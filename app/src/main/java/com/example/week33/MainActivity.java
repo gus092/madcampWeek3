@@ -12,7 +12,7 @@ import android.view.View;
 import com.example.week33.ui.main.SectionsPagerAdapter;
 
 public class MainActivity extends AppCompatActivity {
-
+//sample comment
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
