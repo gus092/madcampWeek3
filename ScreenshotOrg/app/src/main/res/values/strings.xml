@@ -5,27 +5,5 @@
     <string name="tab_text_3">searchview</string>
     <string name="menu_search">search</string>
     <string name="test1">this is the test</string>
-    <string-array name = "array_country">
-        <item>a</item>
-        <item>b</item>
-        <item>c</item>
-        <item>adad</item>
-        <item>dgdg</item>
-        <item>bfff</item>
-        <item>sdbs</item>
-        <item>dbsvd</item>
-        <item>dsads</item>
-        <item>dsav</item>
-        <item>zxcv</item>
-        <item>fffff</item>
-        <item>dddd3</item>
-        <item>ggggg</item>
-        <item>hh</item>
-        <item>eeeee3</item>
-        <item>gfsafd</item>
-        <item>aafdadf</item>
-
-    </string-array>
-
 
 </resources>

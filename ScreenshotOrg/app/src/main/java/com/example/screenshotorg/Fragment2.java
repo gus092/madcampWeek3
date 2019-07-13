@@ -199,35 +199,6 @@ public class Fragment2 extends Fragment {
             );
 
 
-           // cursor = activity.getContentResolver().query(uri, projection, null, null, null);
-
-
-            ///////<< 앨범으로 만들기
-    //            cursor = activity.getContentResolver().query(uri, projection, "GROUP BY (BUCKET_DISPLAY_NAME",
-    //                    null, null);
-    //            while(cursor.moveToNext()){
-    //
-    //            }
-    //                data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
-    //                album = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.BUCKET_DISPLAY_NAME);
-    //
-    //                viewholder{
-    //                    image view = set(data);
-    //                    image view onclik{
-    //
-    //                    }
-    //                    text view = set(album);
-    //
-    //                }
-    //
-    //
-    //
-    //             cursor=   activity.getContentResolver().query(uri, projection, "BUCKET_DISTPLAY_NAME ==" +"'" +album+"'" ,
-    //                     null, null);
-            //<<---- 2번째 view
-            //////<< 앨범으로 만들기
-
-
             column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
             column_index_folder_name = cursor
                     .getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);

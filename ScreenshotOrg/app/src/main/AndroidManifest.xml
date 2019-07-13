@@ -27,7 +27,6 @@
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
-                <action android:name="android.intent.action.SEARCH" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
 
@@ -35,8 +34,9 @@
 
         </activity>
         <activity android:name=".FullImageActivity"/>
-        <activity android:name=".SearchActivity"/>
-
+        <activity
+            android:theme="@style/AppTheme"
+            android:name=".SearchActivity"/>
 
     </application>
 
