@@ -10,6 +10,7 @@ import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Base64;
 import android.view.LayoutInflater;
@@ -20,6 +21,7 @@ import android.widget.BaseAdapter;
 import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
+import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -35,6 +37,7 @@ import com.example.screenshotorg.ui.main.PageViewModel;
 import com.bumptech.glide.Glide;
 
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.util.ArrayList;
 
 /**
@@ -83,11 +86,18 @@ public class Fragment2 extends Fragment {
                 if (null != images && !images.isEmpty()) { // 해당 그리드를 선택하면
 
                     //해당 그리드를 선택하면 하는 동작
-                    //String tag= tag;
-                    Toast.makeText(getContext(),"해당 tag의 갤러리로 이동합니다.",Toast.LENGTH_SHORT).show();
-                    Intent i = new Intent(getActivity(), TagGallery.class);
+
+                    Intent i = new Intent(getActivity(), FullImageActivity.class);
                     i.putExtra("path", images.get(position));
                     startActivity(i);
+
+                    //String tag= tag;
+//                    String root = Environment.getExternalStorageDirectory().toString();
+//                    System.out.println("==================================================================        "+root);
+//                    File myDir = new File(root + "/DCIM/"+"333");
+//                    myDir.mkdirs();
+
+
                 }
 
 
@@ -118,12 +128,6 @@ public class Fragment2 extends Fragment {
             images = getAllShownImagesPath(context);
         }
 
-        public ImageAdapter(Context localContext,int i) {
-            context = localContext;
-            images = getAllShownImagesPath(context);
-            images.remove(i);
-
-        }
 
 
         public int getCount() {
@@ -186,7 +190,16 @@ public class Fragment2 extends Fragment {
             String[] projection = { MediaStore.MediaColumns.DATA,
                     MediaStore.Images.Media.BUCKET_DISPLAY_NAME };
 
-            cursor = activity.getContentResolver().query(uri, projection, null, null, null);
+            cursor = activity.getContentResolver().query(
+                    MediaStore.Files.getContentUri("external"),
+                    null,
+                    MediaStore.Images.Media.DATA + " like ? ",
+                    new String[] {"%Screenshots%"},
+                    null
+            );
+
+
+           // cursor = activity.getContentResolver().query(uri, projection, null, null, null);
 
 
             ///////<< 앨범으로 만들기
