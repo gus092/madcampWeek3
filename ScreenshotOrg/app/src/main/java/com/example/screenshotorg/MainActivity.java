@@ -57,18 +57,17 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
 
 
-        Button dbLogin = (Button)findViewById(R.id.search_button);
-        dbLogin.setOnClickListener(new Button.OnClickListener(){
+        FloatingActionButton searchLogin = (FloatingActionButton)findViewById(R.id.fab);
+        searchLogin.setOnClickListener(new Button.OnClickListener(){
             @Override
             public void onClick(View view){
                 tag="this is a test";
                 Intent intent2 = new Intent(getApplicationContext(), SearchActivity.class);
                 intent2.putExtra("search",tag);
                 startActivity(intent2);
-
             }
-
         });
+
 
 
 //        if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_CONTACTS)!=PackageManager.PERMISSION_GRANTED) {
