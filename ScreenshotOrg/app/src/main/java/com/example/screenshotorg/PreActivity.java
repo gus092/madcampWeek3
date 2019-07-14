@@ -11,6 +11,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
@@ -25,9 +26,13 @@ import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
+import androidx.viewpager.widget.ViewPager;
 
+import com.example.screenshotorg.ui.main.SectionsPagerAdapter;
 import com.google.android.gms.auth.GoogleAuthUtil;
 import com.google.android.gms.common.AccountPicker;
+import com.google.android.material.tabs.TabLayout;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential;
 import com.google.api.client.googleapis.json.GoogleJsonResponseException;
@@ -41,7 +46,9 @@ import com.google.api.services.vision.v1.model.BatchAnnotateImagesResponse;
 import com.google.api.services.vision.v1.model.EntityAnnotation;
 
 import java.io.ByteArrayOutputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -68,12 +75,39 @@ public class PreActivity extends AppCompatActivity {
     private Account mAccount;
     private ProgressDialog mProgressDialog; //Put this in MainActivity so you can use it in other classes
 
+    public static final int MULTIPLE_PERMISSIONS = 10; // code you want.
+    private String[] permissions = new String[]{
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_CONTACTS,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_CONTACTS,
+            //Manifest.permission.GET_ACCOUNTS,
+    };
+
+    //Check phone permissions
+    private boolean checkPermissions() {
+        int result;
+        List<String> listPermissionsNeeded = new ArrayList<>();
+        for (String p : permissions) {
+            result = ContextCompat.checkSelfPermission(this, p);
+            if (result != PackageManager.PERMISSION_GRANTED) {
+                listPermissionsNeeded.add(p);
+            }
+        }
+        if (!listPermissionsNeeded.isEmpty()) {
+            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), MULTIPLE_PERMISSIONS);
+            return false;
+        }
+        return true;
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_pre);
 
         mProgressDialog = new ProgressDialog(this);
+        checkPermissions();
 
         Button selectImageButton = findViewById(R.id.select_image_button);
         selectedImage = findViewById(R.id.selected_image);
@@ -133,13 +167,28 @@ public class PreActivity extends AppCompatActivity {
                                            @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
         switch (requestCode) {
-            case REQUEST_PERMISSIONS:
+            case REQUEST_PERMISSIONS: {
                 if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                     getAuthToken();
                 } else {
                     Toast.makeText(PreActivity.this, "Permission Denied!", Toast.LENGTH_SHORT).show();
                 }
+            }
+            case MULTIPLE_PERMISSIONS: {
+                if (grantResults.length > 0) {
+                    String permissionsDenied = "";
+                    for (String per : permissions) {
+                        if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                            permissionsDenied += "\n" + per;
+                        }
+                    }
+                    // Show permissionsDenied
+                    //updateViews();
+                }
+            }
         }
+
+
     }
 
     //Ignore requestCode == REQUEST_GALLERY_IMAGE (only need for choose image from gallery activity)
@@ -179,9 +228,40 @@ public class PreActivity extends AppCompatActivity {
     //In Image Processor
     public void performCloudVisionRequest(Uri uri) {
         if (uri != null) {
+            Bitmap bitmap = null;
             try {
-                Bitmap bitmap = resizeBitmap(
-                        MediaStore.Images.Media.getBitmap(getContentResolver(), uri));
+//                InputStream image_stream;
+//                try {
+//
+//                    image_stream = this.getContentResolver().openInputStream(uri);
+//
+//                    bitmap = BitmapFactory.decodeStream(image_stream);
+//                } catch (FileNotFoundException e){
+//                    e.printStackTrace();
+//                }
+
+                bitmap = resizeBitmap(MediaStore.Images.Media.getBitmap(getContentResolver(), uri));
+                Log.e("CHECKK: ", uri.toString());
+                //Bitmap bitmap = BitmapFactory.decodeFile(uri.toString());
+                if (bitmap == null){
+                    Log.e("HEY: ", "bitmap is null");
+                }
+                callCloudVision(bitmap);
+                selectedImage.setImageBitmap(bitmap);
+            } catch (IOException e) {
+                Log.e(TAG, e.getMessage());
+            }
+        }
+    }
+
+    public void performCloudVisionRequest1(String filepath) {
+        if (!filepath.equals("")) {
+            //Bitmap bitmap = null;
+            try {
+                Bitmap bitmap = resizeBitmap(BitmapFactory.decodeFile(filepath));
+                if (bitmap == null){
+                    Log.e("HEY: ", "bitmap is null");
+                }
                 callCloudVision(bitmap);
                 selectedImage.setImageBitmap(bitmap);
             } catch (IOException e) {
@@ -194,7 +274,7 @@ public class PreActivity extends AppCompatActivity {
     @SuppressLint("StaticFieldLeak")
     private void callCloudVision(final Bitmap bitmap) throws IOException {
         mProgressDialog = ProgressDialog.show(this, null, "Scanning image with Vision API...", true);
-
+        Log.e("gazua : ", "you are here");
         new AsyncTask<Object, Void, BatchAnnotateImagesResponse>() {
             @Override
             protected BatchAnnotateImagesResponse doInBackground(Object... params) {
@@ -235,6 +315,7 @@ public class PreActivity extends AppCompatActivity {
                     Log.d(TAG, "Sending request to Google Cloud");
 
                     BatchAnnotateImagesResponse response = annotateRequest.execute();
+                    Log.e("my labels: ", getDetectedLabels(response));
                     return response;
 
                 } catch (GoogleJsonResponseException e) {
@@ -354,8 +435,10 @@ public class PreActivity extends AppCompatActivity {
             addStudent(s);
         }
 
-        Student last = new Student(10, getLastImageURI());
+        Student last = new Student(10, getLastImagePath());
         addStudent(last);
+        Toast.makeText(PreActivity.this, "DB Created!", Toast.LENGTH_SHORT).show();
+
     }
 
     public void addStudent (Student stu) {
@@ -363,7 +446,7 @@ public class PreActivity extends AppCompatActivity {
         dbHandler.addHandler(stu);
     }
 
-    public String getLastImageURI() {
+    public String getLastImagePath() {
         Cursor cursor;
         int column_index_data, column_index_folder_name;
         ArrayList<String> listOfAllImages = new ArrayList<String>();
@@ -412,7 +495,7 @@ public class PreActivity extends AppCompatActivity {
                 MediaStore.Images.Media.DATA + " like ? ",
                 new String[] {"%Screenshots%"},
                 android.provider.MediaStore.Images.Media.DATE_TAKEN + " DESC"
-        );
+        );  //Just do it once instead while
         column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
         while (cursor.moveToNext()) {
             absolutePathOfImage = cursor.getString(column_index_data);
@@ -423,7 +506,7 @@ public class PreActivity extends AppCompatActivity {
         String lastImg = dbHandler.findHandler(10).getStudentName();
         int j;
         for (int i=0 ; i < listOfAllImages.size(); i ++){
-            if (listOfAllImages.get(i) == lastImg){
+            if (listOfAllImages.get(i).equals(lastImg)){
                 j = i;
                 break;
             }
@@ -437,9 +520,12 @@ public class PreActivity extends AppCompatActivity {
     }
     public void updateDB(){
         ArrayList<String> mylist = toProcess();
+        Log.e("Babies: " , mylist.toString());
         for (int i = 0 ; i < mylist.size(); i++){
-            performCloudVisionRequest(Uri.parse(mylist.get(i)));
+            performCloudVisionRequest1(mylist.get(i));
         }
+
+        Log.e("Finished my thing: ","hey you're done");
     }
 
 
