@@ -18,13 +18,13 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
-public class Fragment3Adapter extends RecyclerView.Adapter<Fragment3Adapter.Holderview>{
+public class Fragment2Adapter extends RecyclerView.Adapter<Fragment2Adapter.Holderview>{
 
     private List<Item> productlist;
     private Context context;
 
 
-    public Fragment3Adapter(List<Item>productlist,Context context){
+    public Fragment2Adapter(List<Item>productlist,Context context){
         this.productlist = productlist;
         this.context = context;
     }

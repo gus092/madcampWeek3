@@ -18,6 +18,8 @@ import androidx.appcompat.app.AppCompatActivity;
 import com.bumptech.glide.Glide;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 public class EditActivity extends AppCompatActivity {
 
@@ -66,7 +68,6 @@ class CustomAdapter extends BaseAdapter {
     Context context;
     LayoutInflater inflter;
     String value;
-
 
 
     public CustomAdapter(Context context, String[] names) {

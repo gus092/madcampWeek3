@@ -129,6 +129,7 @@ public class Fragment2 extends Fragment {
         int check=0;
 
 
+
         int column_index_data, column_index_folder_name;
         ArrayList<String> listOfAllImages = new ArrayList<String>();
         String absolutePathOfImage = null;

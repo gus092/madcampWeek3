@@ -27,7 +27,7 @@ public class SearchActivity extends Activity {
     RecyclerView listshowrcy;
     List<Item> productlists = new ArrayList<>();
     public androidx.appcompat.widget.SearchView searchView;
-    Fragment3Adapter adapter3;
+    Fragment2Adapter adapter3;
     private static ArrayList<String> images3;
 
 
@@ -66,7 +66,7 @@ public class SearchActivity extends Activity {
         listshowrcy.setHasFixedSize(true);
         LinearLayoutManager linearLayoutManager = new LinearLayoutManager(this);
         listshowrcy.setLayoutManager(linearLayoutManager);
-        adapter3 = new Fragment3Adapter(productlists,this);
+        adapter3 = new Fragment2Adapter(productlists,this);
         listshowrcy.setAdapter(adapter3);
 
     }

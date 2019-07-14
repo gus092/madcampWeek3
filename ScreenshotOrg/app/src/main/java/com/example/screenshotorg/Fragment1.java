@@ -95,7 +95,7 @@ public class Fragment1 extends Fragment {
         images = getAllShownImagesPath(requireContext());
 
         for (int i=1; i<images.size();i++){ //images에는 원하는 사진의 절대경로를 넣으면 됨
-            myDataset.add(new MyData("#추천 tag를 달아주세요",BitmapFactory.decodeFile(images.get(i))));
+            myDataset.add(new MyData("#추천 tag를 달아주세요",BitmapFactory.decodeFile(images.get(i-1))));
         }
 
 
