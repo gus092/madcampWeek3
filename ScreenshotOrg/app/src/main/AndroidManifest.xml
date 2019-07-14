@@ -34,6 +34,7 @@
             android:theme="@style/AppTheme"
             android:name=".SearchActivity"/>
         <activity android:name=".SearchPage"/>
+        <activity android:name=".EditActivity"/>
 
     </application>
 

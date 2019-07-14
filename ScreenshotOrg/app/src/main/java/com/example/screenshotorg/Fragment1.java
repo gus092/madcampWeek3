@@ -72,12 +72,17 @@ public class Fragment1 extends Fragment {
                 new RecyclerItemClickListener(requireContext(),mRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
                     @Override
                     public void onItemClick(View view, int position) {
-                        Toast.makeText(requireContext(),position+"번 째 아이템 클릭",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(),"Edit 하려면 길게 누르세요.",Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(requireContext(),position+"번 째 아이템 클릭",Toast.LENGTH_SHORT).show();
                     }
 
                     @Override
                     public void onLongItemClick(View view, int position) {
-                        Toast.makeText(requireContext(),position+"번 째 아이템 롱 클릭",Toast.LENGTH_SHORT).show();
+                        Toast.makeText(requireContext(),"Edit 모드로 들어갑니다.",Toast.LENGTH_SHORT).show();
+
+                        Intent intent4 = new Intent(getActivity(), EditActivity.class);
+                        intent4.putExtra("edit", images.get(position));
+                        startActivity(intent4);
                     }
                 })); //modified
 
@@ -89,7 +94,7 @@ public class Fragment1 extends Fragment {
 
         images = getAllShownImagesPath(requireContext());
 
-        for (int i=0; i<images.size();i++){ //images에는 원하는 사진의 절대경로를 넣으면 됨
+        for (int i=1; i<images.size();i++){ //images에는 원하는 사진의 절대경로를 넣으면 됨
             myDataset.add(new MyData("#추천 tag를 달아주세요",BitmapFactory.decodeFile(images.get(i))));
         }
 
