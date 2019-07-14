@@ -19,7 +19,9 @@ import com.google.android.material.snackbar.Snackbar;
 import com.google.android.material.tabs.TabLayout;
 
 import androidx.annotation.NonNull;
+import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import androidx.viewpager.widget.ViewPager;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -29,6 +31,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -54,94 +57,111 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 
-//public class MainActivity extends AppCompatActivity {
-//
-//    @Override
-//    protected void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-//        setContentView(R.layout.activity_main);
-//        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
-//        ViewPager viewPager = findViewById(R.id.view_pager);
-//        viewPager.setAdapter(sectionsPagerAdapter);
-//        TabLayout tabs = findViewById(R.id.tabs);
-//        tabs.setupWithViewPager(viewPager);
-//        FloatingActionButton fab = findViewById(R.id.fab);
-//
-//        fab.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View view) {
-//                Snackbar.make(view, "Replace with your own action", Snackbar.LENGTH_LONG)
-//                        .setAction("Action", null).show();
-//            }
-//        });
-//    }
-//}
 
 public class MainActivity extends AppCompatActivity {
 
+    //public static final int MY_PERMISSIONS_REQUEST_READ_CONTACTS = 100;
+    //private static final int MY_PERMISSION_CAMERA = 1111;
     private final String TAG = "CloudVisionExample";
     static final int REQUEST_GALLERY_IMAGE = 100;
     static final int REQUEST_CODE_PICK_ACCOUNT = 101;
     static final int REQUEST_ACCOUNT_AUTHORIZATION = 102;
     static final int REQUEST_PERMISSIONS = 13;
-
-    private static String accessToken;
+    public static String accessToken;
     private ImageView selectedImage;
     private TextView labelResults;
     private TextView textResults;
     private Account mAccount;
-    private ProgressDialog mProgressDialog;
+    public ProgressDialog mProgressDialog;
 
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
+    public static final int MULTIPLE_PERMISSIONS = 10; // code you want.
+    private String[] permissions = new String[]{
+            Manifest.permission.WRITE_EXTERNAL_STORAGE,
+            Manifest.permission.READ_CONTACTS,
+            Manifest.permission.READ_EXTERNAL_STORAGE,
+            Manifest.permission.WRITE_CONTACTS,
+            //Manifest.permission.GET_ACCOUNTS,
+    };
 
-        mProgressDialog = new ProgressDialog(this);
-
-        Button selectImageButton = findViewById(R.id.select_image_button);
-        selectedImage = findViewById(R.id.selected_image);
-        labelResults = findViewById(R.id.tv_label_results);
-        textResults = findViewById(R.id.tv_texts_results);
-
-        selectImageButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                ActivityCompat.requestPermissions(MainActivity.this,
-                        new String[]{Manifest.permission.GET_ACCOUNTS},
-                        REQUEST_PERMISSIONS);
+    //Check phone permissions
+    private boolean checkPermissions() {
+        int result;
+        List<String> listPermissionsNeeded = new ArrayList<>();
+        for (String p : permissions) {
+            result = ContextCompat.checkSelfPermission(this, p);
+            if (result != PackageManager.PERMISSION_GRANTED) {
+                listPermissionsNeeded.add(p);
             }
-        });
-    }
+        }
+        if (!listPermissionsNeeded.isEmpty()) {
+            ActivityCompat.requestPermissions(this, listPermissionsNeeded.toArray(new String[listPermissionsNeeded.size()]), MULTIPLE_PERMISSIONS);
+            return false;
+        }
+//        //Google Permissions
+//        ActivityCompat.requestPermissions(MainActivity.this,
+//                new String[]{Manifest.permission.GET_ACCOUNTS},
+//                REQUEST_PERMISSIONS);
 
-    private void launchImagePicker() {
-        Intent intent = new Intent();
-        intent.setType("image/*");
-        intent.setAction(Intent.ACTION_GET_CONTENT);
-        startActivityForResult(Intent.createChooser(intent, "Select an image"),
-                REQUEST_GALLERY_IMAGE);
+        //Tab setup
+        SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
+        ViewPager viewPager = findViewById(R.id.view_pager);
+        viewPager.setAdapter(sectionsPagerAdapter);
+        TabLayout tabs = findViewById(R.id.tabs);
+        tabs.setupWithViewPager(viewPager);
+
+
+        return true;
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions,
-                                           @NonNull int[] grantResults) {
-        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+    public void onRequestPermissionsResult(int requestCode, @NonNull String permissionsList[], @NonNull int[] grantResults) {
+        //Added from Google Cloud vision
+        super.onRequestPermissionsResult(requestCode, permissionsList, grantResults);
         switch (requestCode) {
-            case REQUEST_PERMISSIONS:
-                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    getAuthToken();
-                } else {
-                    Toast.makeText(MainActivity.this, "Permission Denied!", Toast.LENGTH_SHORT).show();
+            case MULTIPLE_PERMISSIONS: {
+                if (grantResults.length > 0) {
+                    String permissionsDenied = "";
+                    for (String per : permissionsList) {
+                        if (grantResults[0] == PackageManager.PERMISSION_DENIED) {
+                            permissionsDenied += "\n" + per;
+                        }
+                    }
+                    // Show permissionsDenied
+                    //updateViews();
                 }
+
+                SectionsPagerAdapter sectionsPagerAdapter = new SectionsPagerAdapter(this, getSupportFragmentManager());
+                ViewPager viewPager = findViewById(R.id.view_pager);
+                viewPager.setAdapter(sectionsPagerAdapter);
+
+
+                TabLayout tabs = findViewById(R.id.tabs);
+                tabs.setupWithViewPager(viewPager);
+                FloatingActionButton fab = findViewById(R.id.fab);
+                return;
+            }
+            //This is for case: Google account permissions request
+//            case REQUEST_PERMISSIONS: {
+//                //grantResults.length = 0 -> THIS SHOULD NOT BE EMPTY BUT IT IS!!!!!!!
+//                if (grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+//                    getAuthToken();
+//                } else {
+//                    Toast.makeText(MainActivity.this, "Permission Denied!", Toast.LENGTH_LONG).show();
+//                }
+//            }
         }
+
     }
 
+    //For Choose Google Account Activity
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
-        if (requestCode == REQUEST_GALLERY_IMAGE && resultCode == RESULT_OK && data != null) {
-            performCloudVisionRequest(data.getData());
-        } else if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
+        //This used to be for Pick Image from gallery activity
+//        if (requestCode == REQUEST_GALLERY_IMAGE && resultCode == RESULT_OK && data != null) {
+//            performCloudVisionRequest(data.getData());
+//        } else
+        if (requestCode == REQUEST_CODE_PICK_ACCOUNT) {
             if (resultCode == RESULT_OK) {
                 String email = data.getStringExtra(AccountManager.KEY_ACCOUNT_NAME);
                 AccountManager am = AccountManager.get(this);
@@ -168,145 +188,32 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void performCloudVisionRequest(Uri uri) {
-        if (uri != null) {
-            try {
-                Bitmap bitmap = resizeBitmap(
-                        MediaStore.Images.Media.getBitmap(getContentResolver(), uri));
-                callCloudVision(bitmap);
-                selectedImage.setImageBitmap(bitmap);
-            } catch (IOException e) {
-                Log.e(TAG, e.getMessage());
-            }
-        }
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+
+        checkPermissions();
+        //Progress Dialog (similar to progress bar but fancier, will call from other classes
+        mProgressDialog = new ProgressDialog(this);
+//        Button selectImageButton = findViewById(R.id.select_image_button);
+//        selectImageButton.setOnClickListener(new View.OnClickListener() {
+//            @Override
+//            public void onClick(View v) {
+//                //Need this guy to choose account
+//                //This guy is in checkPermissions of MainActivity
+//                ActivityCompat.requestPermissions(MainActivity.this,
+//                        new String[]{Manifest.permission.GET_ACCOUNTS},
+//                        REQUEST_PERMISSIONS);
+//            }
+//        });
+        //Google Permissions
+        //ActivityCompat.requestPermissions(MainActivity.this, new String[]{Manifest.permission.GET_ACCOUNTS}, REQUEST_PERMISSIONS);
+
+
     }
 
-    @SuppressLint("StaticFieldLeak")
-    private void callCloudVision(final Bitmap bitmap) throws IOException {
-        mProgressDialog = ProgressDialog.show(this, null,"Scanning image with Vision API...", true);
-
-        new AsyncTask<Object, Void, BatchAnnotateImagesResponse>() {
-            @Override
-            protected BatchAnnotateImagesResponse doInBackground(Object... params) {
-                try {
-                    GoogleCredential credential = new GoogleCredential().setAccessToken(accessToken);
-                    HttpTransport httpTransport = AndroidHttp.newCompatibleTransport();
-                    JsonFactory jsonFactory = GsonFactory.getDefaultInstance();
-
-                    Vision.Builder builder = new Vision.Builder
-                            (httpTransport, jsonFactory, credential);
-                    Vision vision = builder.build();
-
-                    List<Feature> featureList = new ArrayList<>();
-                    Feature labelDetection = new Feature();
-                    labelDetection.setType("LABEL_DETECTION");
-                    labelDetection.setMaxResults(10);
-                    featureList.add(labelDetection);
-
-                    Feature textDetection = new Feature();
-                    textDetection.setType("TEXT_DETECTION");
-                    textDetection.setMaxResults(10);
-                    featureList.add(textDetection);
-
-                    List<AnnotateImageRequest> imageList = new ArrayList<>();
-                    AnnotateImageRequest annotateImageRequest = new AnnotateImageRequest();
-                    Image base64EncodedImage = getBase64EncodedJpeg(bitmap);
-                    annotateImageRequest.setImage(base64EncodedImage);
-                    annotateImageRequest.setFeatures(featureList);
-                    imageList.add(annotateImageRequest);
-
-                    BatchAnnotateImagesRequest batchAnnotateImagesRequest =
-                            new BatchAnnotateImagesRequest();
-                    batchAnnotateImagesRequest.setRequests(imageList);
-
-                    Vision.Images.Annotate annotateRequest =
-                            vision.images().annotate(batchAnnotateImagesRequest);
-                    annotateRequest.setDisableGZipContent(true);
-                    Log.d(TAG, "Sending request to Google Cloud");
-
-                    BatchAnnotateImagesResponse response = annotateRequest.execute();
-                    return response;
-
-                } catch (GoogleJsonResponseException e) {
-                    Log.e(TAG, "Request error: " + e.getContent());
-                } catch (IOException e) {
-                    Log.d(TAG, "Request error: " + e.getMessage());
-                }
-                return null;
-            }
-
-            protected void onPostExecute(BatchAnnotateImagesResponse response) {
-                mProgressDialog.dismiss();
-                textResults.setText(getDetectedTexts(response));
-                labelResults.setText(getDetectedLabels(response));
-            }
-
-        }.execute();
-    }
-
-    private String getDetectedLabels(BatchAnnotateImagesResponse response){
-        StringBuilder message = new StringBuilder("");
-        List<EntityAnnotation> labels = response.getResponses().get(0).getLabelAnnotations();
-        if (labels != null) {
-            for (EntityAnnotation label : labels) {
-                message.append(String.format(Locale.getDefault(), "%.3f: %s",
-                        label.getScore(), label.getDescription()));
-                message.append("\n");
-            }
-        } else {
-            message.append("nothing\n");
-        }
-
-        return message.toString();
-    }
-
-    private String getDetectedTexts(BatchAnnotateImagesResponse response){
-        StringBuilder message = new StringBuilder("");
-        List<EntityAnnotation> texts = response.getResponses().get(0)
-                .getTextAnnotations();
-        if (texts != null) {
-            for (EntityAnnotation text : texts) {
-                message.append(String.format(Locale.getDefault(), "%s: %s",
-                        text.getLocale(), text.getDescription()));
-                message.append("\n");
-            }
-        } else {
-            message.append("nothing\n");
-        }
-
-        return message.toString();
-    }
-
-    public Bitmap resizeBitmap(Bitmap bitmap) {
-
-        int maxDimension = 1024;
-        int originalWidth = bitmap.getWidth();
-        int originalHeight = bitmap.getHeight();
-        int resizedWidth = maxDimension;
-        int resizedHeight = maxDimension;
-
-        if (originalHeight > originalWidth) {
-            resizedHeight = maxDimension;
-            resizedWidth = (int) (resizedHeight * (float) originalWidth / (float) originalHeight);
-        } else if (originalWidth > originalHeight) {
-            resizedWidth = maxDimension;
-            resizedHeight = (int) (resizedWidth * (float) originalHeight / (float) originalWidth);
-        } else if (originalHeight == originalWidth) {
-            resizedHeight = maxDimension;
-            resizedWidth = maxDimension;
-        }
-        return Bitmap.createScaledBitmap(bitmap, resizedWidth, resizedHeight, false);
-    }
-
-    public Image getBase64EncodedJpeg(Bitmap bitmap) {
-        Image image = new Image();
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 90, byteArrayOutputStream);
-        byte[] imageBytes = byteArrayOutputStream.toByteArray();
-        image.encodeContent(imageBytes);
-        return image;
-    }
-
+    //Google Cloud Vision
     private void pickUserAccount() {
         String[] accountTypes = new String[]{GoogleAuthUtil.GOOGLE_ACCOUNT_TYPE};
         Intent intent = AccountPicker.newChooseAccountIntent(null, null,
@@ -323,9 +230,7 @@ public class MainActivity extends AppCompatActivity {
                     .execute();
         }
     }
-
     public void onTokenReceived(String token){
         accessToken = token;
-        launchImagePicker();
     }
 }

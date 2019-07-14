@@ -1,20 +1,24 @@
 package com.example.screenshotorg;
 
+import android.Manifest;
 import android.app.Activity;
 import android.database.Cursor;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
+import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
+import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
@@ -22,6 +26,8 @@ import androidx.lifecycle.ViewModelProviders;
 import com.bumptech.glide.Glide;
 import com.example.screenshotorg.R;
 import com.example.screenshotorg.ui.main.PageViewModel;
+import com.google.android.gms.common.api.Batch;
+import com.google.api.services.vision.v1.model.BatchAnnotateImagesResponse;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,7 +37,10 @@ import java.util.Collections;
  */
 public class Fragment1 extends Fragment {
     private ArrayList<String> images;
-
+    ImageProcessor myImageProcessor;
+    static TextView textView, textResults;
+    Button button;
+    Uri currentUri;
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -48,6 +57,21 @@ public class Fragment1 extends Fragment {
             @NonNull LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.onefragment, container, false);
+        myImageProcessor = new ImageProcessor();
+        textView = view.findViewById(R.id.textView);
+        textResults = view.findViewById(R.id.textResults);
+        button = view.findViewById(R.id.button2);
+        button.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                //Need this guy to choose account
+                //This guy is in checkPermissions of MainActivity
+                BatchAnnotateImagesResponse temp = myImageProcessor.performCloudVisionRequest(getContext(),currentUri);
+                    if (temp != null) {
+                    textView.setText(temp.toString()); //This is null
+                }
+            }
+        });
 
         GridView gallery = (GridView) view.findViewById(R.id.galleryGridView);
         gallery.setAdapter(new ImageAdapter((Activity) requireActivity()));
@@ -58,6 +82,7 @@ public class Fragment1 extends Fragment {
 //                textView.setText(s);
 //            }
 //        });
+
         return view;
     }
 
@@ -107,6 +132,12 @@ public class Fragment1 extends Fragment {
                     .placeholder(R.drawable.ic_launcher_background).centerCrop()
                     .into(picturesView);
 
+            //Not sure if this will work
+            currentUri = Uri.parse(images.get(position));
+            BatchAnnotateImagesResponse temp = myImageProcessor.performCloudVisionRequest(getContext(),currentUri);
+            if (temp != null) {
+                textView.setText(temp.toString()); //This is null
+            }
             return picturesView;
         }
 
@@ -124,6 +155,8 @@ public class Fragment1 extends Fragment {
             ArrayList<String> listOfAllImages = new ArrayList<String>();
             String absolutePathOfImage = null;
             uri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+            //currentUri = uri;
+            //Log.e("URI tag", uri.toString());
 
             String[] projection = { MediaStore.MediaColumns.DATA,
                     MediaStore.Images.Media.BUCKET_DISPLAY_NAME };
@@ -134,7 +167,7 @@ public class Fragment1 extends Fragment {
                     null,
                     MediaStore.Images.Media.DATA + " like ? ",
                     new String[] {"%Screenshots%"},
-                    null
+                    android.provider.MediaStore.Images.Media.DATE_TAKEN + " DESC"
             );
             column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
             column_index_folder_name = cursor
@@ -145,7 +178,7 @@ public class Fragment1 extends Fragment {
                 listOfAllImages.add(absolutePathOfImage);
             }
 
-            Collections.reverse(listOfAllImages);
+            //Collections.reverse(listOfAllImages);
             return listOfAllImages;
         }
     }

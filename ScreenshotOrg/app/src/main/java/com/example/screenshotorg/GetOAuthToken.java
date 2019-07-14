@@ -28,7 +28,7 @@ public class GetOAuthToken extends AsyncTask<Void, Void, Void> {
         try {
             String token = fetchToken();
             if (token != null) {
-                ((MainActivity)mActivity).onTokenReceived(token);
+                ((PreActivity)mActivity).onTokenReceived(token);
             }
         } catch (IOException e) {
             e.printStackTrace();
