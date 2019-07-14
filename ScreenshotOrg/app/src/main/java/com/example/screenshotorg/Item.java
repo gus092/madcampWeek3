@@ -1,12 +1,12 @@
 package com.example.screenshotorg;
 
-import android.view.View;
+import android.graphics.Bitmap;
 
 public class Item {
     private  String name;
-    private int photo;
+    private Bitmap photo;
 
-    public Item(String name, int photo){
+    public Item(String name, Bitmap photo){
         this.name = name;
         this.photo = photo;
     }
@@ -18,11 +18,11 @@ public class Item {
         this.name= name;
     }
 
-    public int getPhoto() {
+    public Bitmap getPhoto() {
         return photo;
     }
 
-    public void setPhoto(int photo){
+    public void setPhoto(Bitmap photo){
         this.photo = photo;
     }
 

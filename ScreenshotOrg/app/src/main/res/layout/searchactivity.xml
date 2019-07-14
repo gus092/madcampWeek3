@@ -12,7 +12,7 @@
     <androidx.recyclerview.widget.RecyclerView
         android:id="@+id/listshow"
         android:layout_width="match_parent"
-        android:layout_height="647dp"
+        android:layout_height="fill_parent"
         android:fadeScrollbars="true"
         android:scrollbars="vertical" />
 

@@ -1,8 +1,13 @@
 package com.example.screenshotorg;
 
 import android.app.Activity;
+import android.content.Context;
 import android.content.Intent;
+import android.database.Cursor;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -23,7 +28,8 @@ public class SearchActivity extends Activity {
     List<Item> productlists = new ArrayList<>();
     public androidx.appcompat.widget.SearchView searchView;
     Fragment3Adapter adapter3;
-     public static ArrayList<String> images;
+    private static ArrayList<String> images3;
+
 
 
     @Override
@@ -33,21 +39,28 @@ public class SearchActivity extends Activity {
 
         setContentView(R.layout.searchactivity);
         Intent intent2 = getIntent();
+        String dirname = intent2.getStringExtra("dirname");
 
-        String search = intent2.getStringExtra("search");
+        //modified
 
+//
+//        productlists.add(new Item("1111 dog one",R.drawable.dog1));
+//        productlists.add(new Item("222 dog two",R.drawable.dog2));
+//        productlists.add(new Item("3333 dog three",R.drawable.dog3));
+//        productlists.add(new Item("4444 dog four",R.drawable.dog4));
+//        productlists.add(new Item("5555 doug five",R.drawable.dog5));
+//        productlists.add(new Item("six",R.drawable.dog6));
+//        productlists.add(new Item("seven",R.drawable.dog7));
+//        productlists.add(new Item("eight",R.drawable.dog8));
+//        productlists.add(new Item("nine dog 9999 ",R.drawable.dog9));
 
-        productlists.add(new Item("1111 dog one",R.drawable.dog1));
-        productlists.add(new Item("222 dog two",R.drawable.dog2));
-        productlists.add(new Item("3333 dog three",R.drawable.dog3));
-        productlists.add(new Item("4444 dog four",R.drawable.dog4));
-        productlists.add(new Item("5555 doug five",R.drawable.dog5));
-        productlists.add(new Item("six",R.drawable.dog6));
-        productlists.add(new Item("seven",R.drawable.dog7));
-        productlists.add(new Item("eight",R.drawable.dog8));
-        productlists.add(new Item("nine dog 9999 ",R.drawable.dog9));
+        images3 = getAllShownImagesPath(this);
 
+        for (int i=0; i<images3.size();i++){ //images에는 원하는 사진의 절대경로를 넣으면 됨
+            productlists.add(new Item("#추천 tag를 달아주세요", BitmapFactory.decodeFile(images3.get(i))));
+        }
 
+        //modified
 
         listshowrcy =(RecyclerView)findViewById(R.id.listshow);
         listshowrcy.setHasFixedSize(true);
@@ -57,6 +70,40 @@ public class SearchActivity extends Activity {
         listshowrcy.setAdapter(adapter3);
 
     }
+    private ArrayList<String> getAllShownImagesPath(Context activity) {
+        // grouping 된 첫사진만
+        Uri uri;
+        Cursor cursor;
+        int data,album;
+        int check=0;
+        int column_index_data, column_index_folder_name;
+        ArrayList<String> listOfAllImages = new ArrayList<String>();
+        String absolutePathOfImage = null;
+        uri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        // 수정할부분
+        String[] projection = { MediaStore.MediaColumns.DATA,
+                MediaStore.Images.Media.BUCKET_DISPLAY_NAME };
+
+        cursor = activity.getContentResolver().query(
+                MediaStore.Files.getContentUri("external"),
+                null,
+                MediaStore.Images.Media.DATA + " like ? ",
+                new String[] {"%Screenshots%"},
+                null
+        );
+        column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+        column_index_folder_name = cursor
+                .getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
+        while (cursor.moveToNext()) {
+
+            absolutePathOfImage = cursor.getString(column_index_data);
+            listOfAllImages.add(absolutePathOfImage);
+
+        }
+        return listOfAllImages;
+    }//modified
+
+
     @Override
     public boolean onCreateOptionsMenu(Menu menu){
 

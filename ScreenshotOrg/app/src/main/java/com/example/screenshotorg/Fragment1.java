@@ -2,15 +2,20 @@ package com.example.screenshotorg;
 
 import android.app.Activity;
 import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
@@ -57,13 +62,24 @@ public class Fragment1 extends Fragment {
         ((LinearLayoutManager) mLayoutManager).setStackFromEnd(true);
         mRecyclerView.setLayoutManager(mLayoutManager);
 
-
-
         // specify an adapter (see also next example)
         myDataset = new ArrayList<>();
         mAdapter = new MyAdapter(myDataset);
         mRecyclerView.setAdapter(mAdapter);
 
+
+        mRecyclerView.addOnItemTouchListener(
+                new RecyclerItemClickListener(requireContext(),mRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        Toast.makeText(requireContext(),position+"번 째 아이템 클릭",Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onLongItemClick(View view, int position) {
+                        Toast.makeText(requireContext(),position+"번 째 아이템 롱 클릭",Toast.LENGTH_SHORT).show();
+                    }
+                })); //modified
 
 //        myDataset.add(new MyData("#InsideOut", R.drawable.search));
 //        myDataset.add(new MyData("#Mini", R.drawable.search));
@@ -77,6 +93,7 @@ public class Fragment1 extends Fragment {
             myDataset.add(new MyData("#추천 tag를 달아주세요",BitmapFactory.decodeFile(images.get(i))));
         }
 
+
 //        final TextView textView = root.findViewById(R.id.section_label);
 //        pageViewModel.getText().observe(this, new Observer<String>() {
 //            @Override
@@ -86,6 +103,58 @@ public class Fragment1 extends Fragment {
 //        });
         return root;
     }
+
+
+    public static class RecyclerItemClickListener implements RecyclerView.OnItemTouchListener {
+        private OnItemClickListener mListener;
+
+        public interface OnItemClickListener {
+            void onItemClick(View view, int position);
+
+            void onLongItemClick(View view, int position);
+        }
+
+        GestureDetector mGestureDetector;
+
+        public RecyclerItemClickListener(Context context, final RecyclerView recyclerView, OnItemClickListener listener) {
+            mListener = listener;
+            mGestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+                @Override
+                public boolean onSingleTapUp(MotionEvent e) {
+                    return true;
+                }
+
+                @Override
+                public void onLongPress(MotionEvent e) {
+                    View child = recyclerView.findChildViewUnder(e.getX(), e.getY());
+                    if (child != null && mListener != null) {
+                        Log.d("long","press");
+                        mListener.onLongItemClick(child, recyclerView.getChildAdapterPosition(child));
+                    }
+                }
+            });
+        }
+
+        @Override public boolean onInterceptTouchEvent(RecyclerView view, MotionEvent e) {
+            View childView = view.findChildViewUnder(e.getX(), e.getY());
+            if (childView != null && mListener != null && mGestureDetector.onTouchEvent(e)) {
+                mListener.onItemClick(childView, view.getChildAdapterPosition(childView));
+                return true;
+            }
+            return false;
+        }
+
+        @Override public void onTouchEvent(RecyclerView view, MotionEvent motionEvent) { }
+
+        @Override public void onRequestDisallowInterceptTouchEvent (boolean disallowIntercept){}
+    }  //modified
+
+
+
+
+
+
+
     private ArrayList<String> getAllShownImagesPath(Context activity) {
         // grouping 된 첫사진만
         Uri uri;
@@ -122,39 +191,3 @@ public class Fragment1 extends Fragment {
     }//modified
 
 }
-
-///**
-// * A placeholder fragment containing a simple view.
-// */
-//public class Fragment1 extends Fragment {
-//
-//    private static final String ARG_SECTION_NUMBER = "section_number";
-//
-//
-//
-//    @Override
-//    public void onCreate(Bundle savedInstanceState) {
-//        super.onCreate(savedInstanceState);
-////        pageViewModel = ViewModelProviders.of(this).get(PageViewModel.class);
-////        int index = 1;
-////        if (getArguments() != null) {
-////            index = getArguments().getInt(ARG_SECTION_NUMBER);
-////        }
-////        pageViewModel.setIndex(index);
-//    }
-//
-//    @Override
-//    public View onCreateView(
-//            @NonNull LayoutInflater inflater, ViewGroup container,
-//            Bundle savedInstanceState) {
-//        View root = inflater.inflate(R.layout.onefragment, container, false);
-////        final TextView textView = root.findViewById(R.id.section_label);
-////        pageViewModel.getText().observe(this, new Observer<String>() {
-////            @Override
-////            public void onChanged(@Nullable String s) {
-////                textView.setText(s);
-////            }
-////        });
-//        return root;
-//    }
-//}

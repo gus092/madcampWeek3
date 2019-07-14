@@ -33,6 +33,7 @@
         <activity
             android:theme="@style/AppTheme"
             android:name=".SearchActivity"/>
+        <activity android:name=".SearchPage"/>
 
     </application>
 

@@ -62,9 +62,9 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onClick(View view){
                 tag="this is a test";
-                Intent intent2 = new Intent(getApplicationContext(), SearchActivity.class);
-                intent2.putExtra("search",tag);
-                startActivity(intent2);
+                Intent intent3 = new Intent(getApplicationContext(),SearchPage.class);
+                intent3.putExtra("search",tag);
+                startActivity(intent3);
             }
         });
 

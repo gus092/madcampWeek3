@@ -1,9 +1,12 @@
 package com.example.screenshotorg;
 
 import android.content.Context;
+import android.content.Intent;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.AdapterView;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -36,13 +39,23 @@ public class Fragment3Adapter extends RecyclerView.Adapter<Fragment3Adapter.Hold
     @Override
     public void onBindViewHolder(@NonNull Holderview holder, final int position) {
         holder.v_name.setText(productlist.get(position).getName());
-        holder.v_image.setImageResource(productlist.get(position).getPhoto());
+        //holder.v_image.setImageResource(productlist.get(position).getPhoto());
+        holder.v_image.setImageBitmap(productlist.get(position).getPhoto());
+
+
 
         holder.itemView.setOnClickListener(new View.OnClickListener(){
             @Override
             public void onClick(View view){
                 Toast.makeText(context,"click on"+productlist.get(position).getName(),Toast.LENGTH_LONG).show();
+//                Intent intent = new Intent(view.getContext(), SearchActivity.class);
+//                intent.putExtra("dirname",productlist.get(position).getName());
+//                view.getContext().startActivity(intent);
+
+
             }
+
+
         });
 
     }
