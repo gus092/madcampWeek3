@@ -1,5 +1,5 @@
 package com.example.screenshotorg;
-
+//이거는 날리는 방지용입니다.
 import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
