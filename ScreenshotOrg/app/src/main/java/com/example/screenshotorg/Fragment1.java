@@ -83,11 +83,11 @@ public class Fragment1 extends Fragment {
 
         mRecyclerView.addOnItemTouchListener(
                 new RecyclerItemClickListener(requireContext(),mRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
-                    @Override
-                    public void onItemClick(View view, int position) {
-                        Toast.makeText(requireContext(),"Edit 하려면 길게 누르세요.",Toast.LENGTH_SHORT).show();
-                        //Toast.makeText(requireContext(),position+"번 째 아이템 클릭",Toast.LENGTH_SHORT).show();
-                    }
+//                    @Override
+//                    public void onItemClick(View view, int position) {
+//                        Toast.makeText(requireContext(),"Edit 하려면 길게 누르세요.",Toast.LENGTH_SHORT).show();
+//                        //Toast.makeText(requireContext(),position+"번 째 아이템 클릭",Toast.LENGTH_SHORT).show();
+//                    }
 
                     @Override
                     public void onLongItemClick(View view, int position) {
@@ -95,6 +95,7 @@ public class Fragment1 extends Fragment {
 
                         Intent intent4 = new Intent(getActivity(), EditActivity.class);
                         intent4.putExtra("edit", images.get(position));
+                        intent4.putExtra("cardviewNumber",position);
                         startActivity(intent4);
                     }
                 })); //modified
@@ -107,6 +108,7 @@ public class Fragment1 extends Fragment {
 
         //Getting String arraylist from DB
         MyDBHandler dbHandler = new MyDBHandler(getContext(), null, null, 1);
+        images = new ArrayList<String>();
 
         try{
             JSONObject json = new JSONObject((dbHandler.findHandler(0).getStudentName()));
@@ -115,6 +117,8 @@ public class Fragment1 extends Fragment {
             for (int i=0; i<totalarr.length();i++){ //images에는 원하는 사진의 절대경로를 넣으면 됨
                 JSONObject currObj = totalarr.getJSONObject(i);
                 String path = currObj.get("path").toString();
+                images.add(path);
+
                 JSONArray categoryArray = currObj.getJSONArray("categories");
                 ArrayList<String> cat = new ArrayList<String>();
                 if (categoryArray != null) {
@@ -129,6 +133,27 @@ public class Fragment1 extends Fragment {
         }catch(JSONException e){
             e.printStackTrace();
         }
+
+
+//        mRecyclerView.addOnItemTouchListener(
+//                new RecyclerItemClickListener(requireContext(),mRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
+////                    @Override
+////                    public void onItemClick(View view, int position) {
+////                        Toast.makeText(requireContext(),"Edit 하려면 길게 누르세요.",Toast.LENGTH_SHORT).show();
+////                        //Toast.makeText(requireContext(),position+"번 째 아이템 클릭",Toast.LENGTH_SHORT).show();
+////                    }
+//
+//                    @Override
+//                    public void onLongItemClick(View view, int position) {
+//                        Toast.makeText(requireContext(),"Edit 모드로 들어갑니다.",Toast.LENGTH_SHORT).show();
+//
+//                        Intent intent4 = new Intent(getActivity(), EditActivity.class);
+//                        intent4.putExtra("edit", images.get(position));
+//                        startActivity(intent4);
+//                    }
+//                })); //modified
+
+
 
 
 
@@ -157,7 +182,7 @@ public class Fragment1 extends Fragment {
         private OnItemClickListener mListener;
 
         public interface OnItemClickListener {
-            void onItemClick(View view, int position);
+            //void onItemClick(View view, int position);
 
             void onLongItemClick(View view, int position);
         }
@@ -186,7 +211,7 @@ public class Fragment1 extends Fragment {
         @Override public boolean onInterceptTouchEvent(RecyclerView view, MotionEvent e) {
             View childView = view.findChildViewUnder(e.getX(), e.getY());
             if (childView != null && mListener != null && mGestureDetector.onTouchEvent(e)) {
-                mListener.onItemClick(childView, view.getChildAdapterPosition(childView));
+                //mListener.onItemClick(childView, view.getChildAdapterPosition(childView));
                 return true;
             }
             return false;

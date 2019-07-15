@@ -1,6 +1,7 @@
 package com.example.screenshotorg;
 
 import android.content.Intent;
+import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
@@ -22,9 +23,11 @@ public class RecyclerViewHolders extends RecyclerView.ViewHolder implements View
 
     @Override
     public void onClick(View view) {
-        Toast.makeText(view.getContext(), "Clicked Country Position = " + getPosition(), Toast.LENGTH_SHORT).show();
+        Toast.makeText(view.getContext(), "Clicked Country Position = " + getLayoutPosition(), Toast.LENGTH_SHORT).show();
+        Log.e("PPPPOS", "Layoutpos: " + getLayoutPosition()+ " getAdapterPosition: " + getAdapterPosition());
+
         Intent intent = new Intent(view.getContext(), SearchActivity.class);
-        intent.putExtra("dirname",getPosition());
+        intent.putExtra("dirname", getLayoutPosition());
         view.getContext().startActivity(intent);
 
     }

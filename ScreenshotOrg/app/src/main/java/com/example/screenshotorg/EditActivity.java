@@ -3,6 +3,7 @@ package com.example.screenshotorg;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Bundle;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +18,10 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.io.File;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -26,6 +31,7 @@ public class EditActivity extends AppCompatActivity {
     String value;
     public static String[] categories = {"Shopping", "Food", "Places", "Cosmetic", "Fashion","Text","Celebrities","Etc"};
     public static int checknumber=1000;
+    public static int choice=-1;
     public static CustomAdapter customAdapter;
 
     @Override
@@ -35,7 +41,10 @@ public class EditActivity extends AppCompatActivity {
 
         Intent i = getIntent();
 
-        String path = i.getStringExtra("edit");
+        final String path = i.getStringExtra("edit");
+        final int cardviewnum = i.getIntExtra("cardviewNumber",-1);
+
+
 
         ImageView GalleryPreviewImg = (ImageView) findViewById(R.id.full_image_view2);
 
@@ -55,11 +64,92 @@ public class EditActivity extends AppCompatActivity {
         listView.setAdapter(customAdapter);
         //added
 
-
+        final MyDBHandler dbHandler = new MyDBHandler(this, null, null, 1);
 
         View.OnClickListener closebtn_listener = new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                //choice, path
+                try {
+                    Log.e("pathpath", "You're here: cardviewnum: " + cardviewnum + " path: " + path);
+                    JSONObject json = new JSONObject((dbHandler.findHandler(0).getStudentName()));
+                    JSONArray totalarr = json.getJSONArray("total");
+                    JSONObject imgjson = totalarr.getJSONObject(cardviewnum);
+                    JSONArray currcategories = imgjson.getJSONArray("categories");
+                    String cat = "";
+                    if (imgjson.get("path").equals(path)){
+                        Log.e("ENTER AHAHAH", "You're here: cardviewnum: " + cardviewnum);
+                        switch( cardviewnum) {
+                            case 0:
+                                cat = "shopping";
+                                break;
+                            case 1:
+                                cat = "food";
+                                break;
+                            case 2:
+                                cat = "places";
+                                break;
+                            case 3:
+                                cat = "cosmetic";
+                                break;
+                            case 4:
+                                cat = "fashion";
+                                break;
+                            case 5:
+                                cat = "text";
+                                break;
+                            case 6:
+                                cat = "celebrities";
+                                break;
+                            case 7:
+                                cat = "etc";
+                                break;
+                        }
+
+                        if (!cat.equals("")){
+//                            for (int t = 0; t < currcategories.length(); t++){
+//                                int pos = -1;
+//                                JSONArray currentlist = json.getJSONArray(currcategories.get(t).toString());
+//                                for (int k = 0; k < currentlist.length(); k++){
+//                                    if (currentlist.get(k).toString().equals(path)){
+//                                        pos = k;
+//                                        break;
+//                                    }
+//                                }
+//                                if (pos >-1) {
+//                                    currentlist.remove(pos);
+//                                }
+//                                json.put(currcategories.get(t).toString(), currentlist);
+//                            }
+
+                            JSONArray carray = new JSONArray();
+                            carray.put(cat);
+                            imgjson.put("categories",carray);
+                            //totalarr.remove(cardviewnum);
+                            totalarr.put(cardviewnum, imgjson);
+
+                            JSONArray updatedcat = json.getJSONArray(cat);
+                            updatedcat.put(path);
+                            json.put(cat, updatedcat);
+                            json.put("total", totalarr);
+                            dbHandler.updateHandler(0, json.toString());
+
+
+                        }
+
+                    }
+//                    for (int k = 0 ; k < totalarr.length(); k ++){
+//                        //total
+//                    }
+
+                } catch (JSONException e){
+                    e.printStackTrace();
+                }
+
+
+
+
+
                 checknumber=1000;
                 finish();
             }
@@ -126,8 +216,6 @@ class CustomAdapter extends BaseAdapter {
 // set cheek mark drawable and set checked property to false
                     value = "un-Checked";
                     //Checked.setImageResource(R.draw);
-
-
                     Checked.setVisibility(View.GONE);
                     EditActivity.checknumber=1000;
                     simpleCheckedTextView.setChecked(false);
@@ -137,11 +225,18 @@ class CustomAdapter extends BaseAdapter {
                     value = "Checked";
                     Checked.setImageResource(R.drawable.checked);
 
-                    EditActivity.checknumber=position;
+                    EditActivity.checknumber = position;
+                    EditActivity.choice = position;
                     EditActivity.customAdapter = new CustomAdapter(context, EditActivity.categories);
+                    System.out.println("cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc               "+ position);
 
 //                    simpleCheckedTextView.setCheckMarkDrawable(R.drawable.checked);
                     simpleCheckedTextView.setChecked(true);
+
+
+
+
+
                 }
 
                     Toast.makeText(context, value, Toast.LENGTH_SHORT).show();

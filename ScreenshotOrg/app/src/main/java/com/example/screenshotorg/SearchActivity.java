@@ -19,6 +19,10 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,7 +43,55 @@ public class SearchActivity extends Activity {
 
         setContentView(R.layout.searchactivity);
         Intent intent2 = getIntent();
-        String dirname = intent2.getStringExtra("dirname");
+        int dirname = intent2.getIntExtra("dirname",-1);
+
+        String mycatname = "total";
+        switch (dirname){
+            case 0:
+                mycatname = "shopping";
+                break;
+            case 1:
+                mycatname = "food";
+                break;
+            case 2:
+                mycatname = "places";
+                break;
+            case 3:
+                mycatname = "cosmetic";
+                break;
+            case 4:
+                mycatname = "fashion";
+                break;
+            case 5:
+                mycatname = "text";
+                break;
+            case 6:
+                mycatname = "celebrities";
+                break;
+            case 7:
+                mycatname = "etc";
+                break;
+            default:
+                mycatname = "total";
+                break;
+        }
+        ArrayList<String> myimagelist = new ArrayList<String>();
+        MyDBHandler dbHandler = new MyDBHandler(this, null, null, 1);
+        try {
+            JSONObject json = new JSONObject((dbHandler.findHandler(0).getStudentName()));
+            JSONArray myType = json.getJSONArray(mycatname);
+            for (int i = 0; i < myType.length(); i ++){
+                myimagelist.add(myType.get(0).toString());
+            }
+
+        } catch (JSONException e){
+            e.printStackTrace();
+        }
+
+
+
+
+
 
         //modified
 
@@ -54,7 +106,7 @@ public class SearchActivity extends Activity {
 //        productlists.add(new Item("eight",R.drawable.dog8));
 //        productlists.add(new Item("nine dog 9999 ",R.drawable.dog9));
 
-        images3 = getAllShownImagesPath(this);
+        images3 = myimagelist;//getAllShownImagesPath(this);
 
         for (int i=0; i<images3.size();i++){ //images에는 원하는 사진의 절대경로를 넣으면 됨
             productlists.add(new Item("#추천 tag를 달아주세요", BitmapFactory.decodeFile(images3.get(i))));

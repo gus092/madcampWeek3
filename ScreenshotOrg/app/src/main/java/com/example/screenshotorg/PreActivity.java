@@ -639,6 +639,7 @@ public class PreActivity extends AppCompatActivity {
         String[] cosmetics = {"cosmetic", "lip", "eyeshadow", "tint", "beauty", "perfume", "blush", "mascara", "foundation", "skin care"};
         String[] fashion = {"hat", "sunglass", "shirt", "dress", "scarf", "pants","fashion", "shoes", "clothes", "bag"};
         String[] text = {"text", "document"};
+        String[] celebrities = {"people", "person", "celebrity", "singer", "face"};
 
         if (filepath.equals("a")) {
             return;
@@ -726,6 +727,18 @@ public class PreActivity extends AppCompatActivity {
                     textjson.put(filepath);
                     json.put("text", textjson);
                     carray.put("text");
+                    //dbHandler.updateHandler(0, json.toString()); //For multiple categories this belongs outside
+                    count++;
+                    break;
+                }
+            }
+
+            JSONArray celebjson = json.getJSONArray("celebrities");
+            for (String s :celebrities){
+                if (containsIgnoreCase(label, s)){
+                    celebjson.put(filepath);
+                    json.put("celebrities", celebjson);
+                    carray.put("celebrities");
                     //dbHandler.updateHandler(0, json.toString()); //For multiple categories this belongs outside
                     count++;
                     break;
