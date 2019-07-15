@@ -36,6 +36,10 @@ import com.example.screenshotorg.ui.main.PageViewModel;
 import com.google.android.gms.common.api.Batch;
 import com.google.api.services.vision.v1.model.BatchAnnotateImagesResponse;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.ArrayList;
 
 public class Fragment1 extends Fragment {
@@ -44,6 +48,7 @@ public class Fragment1 extends Fragment {
     private RecyclerView.LayoutManager mLayoutManager;
     private ArrayList<MyData> myDataset;
     private static ArrayList<String> images;
+    private static ArrayList<String> categories;
 
 
 
@@ -58,8 +63,8 @@ public class Fragment1 extends Fragment {
             @NonNull LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
         View root = inflater.inflate(R.layout.onefragment, container, false);
-        mRecyclerView = (RecyclerView)root.findViewById(R.id.my_recycler_view);
-
+        //mRecyclerView = (RecyclerView)root.findViewById(R.id.my_recycler_view);
+        mRecyclerView = root.findViewById(R.id.aa);
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);
@@ -98,13 +103,42 @@ public class Fragment1 extends Fragment {
 //        myDataset.add(new MyData("#Mini", R.drawable.search));
 //        myDataset.add(new MyData("#ToyStroy", R.drawable.search));
 
+
+
+        //Getting String arraylist from DB
+        MyDBHandler dbHandler = new MyDBHandler(getContext(), null, null, 1);
+
+        try{
+            JSONObject json = new JSONObject((dbHandler.findHandler(0).getStudentName()));
+            JSONArray totalarr = json.getJSONArray("total");
+
+            for (int i=0; i<totalarr.length();i++){ //images에는 원하는 사진의 절대경로를 넣으면 됨
+                JSONObject currObj = totalarr.getJSONObject(i);
+                String path = currObj.get("path").toString();
+                JSONArray categoryArray = currObj.getJSONArray("categories");
+                ArrayList<String> cat = new ArrayList<String>();
+                if (categoryArray != null) {
+                    for (int j = 0 ; j <categoryArray.length(); j++){
+                        cat.add(categoryArray.get(j).toString());
+                    }
+                }
+                String tag=cat.toString();
+                myDataset.add(new MyData(tag,BitmapFactory.decodeFile(path)));
+            }
+
+        }catch(JSONException e){
+            e.printStackTrace();
+        }
+
+
+
         //modified
 
-        images = getAllShownImagesPath(requireContext());
+       // images = getAllShownImagesPath(requireContext());
+        //categories=
 
-        for (int i=1; i<images.size();i++){ //images에는 원하는 사진의 절대경로를 넣으면 됨
-            myDataset.add(new MyData("#추천 tag를 달아주세요",BitmapFactory.decodeFile(images.get(i-1))));
-        }
+
+
 
 
 //        final TextView textView = root.findViewById(R.id.section_label);
@@ -115,7 +149,7 @@ public class Fragment1 extends Fragment {
 //            }
 //        });
 
-        return view;
+        return root;
     }
 
 
@@ -171,36 +205,55 @@ public class Fragment1 extends Fragment {
 
     private ArrayList<String> getAllShownImagesPath(Context activity) {
         // grouping 된 첫사진만
-        Uri uri;
-        Cursor cursor;
-        int data,album;
-        int check=0;
-
-
-        int column_index_data, column_index_folder_name;
+//        Uri uri;
+//        Cursor cursor;
+//        int data,album;
+//        int check=0;
+//
+//
+//        int column_index_data, column_index_folder_name;
+//        ArrayList<String> listOfAllImages = new ArrayList<String>();
+//        String absolutePathOfImage = null;
+//        uri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+//        // 수정할부분
+//        String[] projection = { MediaStore.MediaColumns.DATA,
+//                MediaStore.Images.Media.BUCKET_DISPLAY_NAME };
+//
+//        cursor = activity.getContentResolver().query(
+//                MediaStore.Files.getContentUri("external"),
+//                null,
+//                MediaStore.Images.Media.DATA + " like ? ",
+//                new String[] {"%Screenshots%"},
+//                null
+//        );
+//        column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+//        column_index_folder_name = cursor
+//                .getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
+//        while (cursor.moveToNext()) {
+//
+//            absolutePathOfImage = cursor.getString(column_index_data);
+//            listOfAllImages.add(absolutePathOfImage);
+//
+//        }
         ArrayList<String> listOfAllImages = new ArrayList<String>();
-        String absolutePathOfImage = null;
-        uri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-        // 수정할부분
-        String[] projection = { MediaStore.MediaColumns.DATA,
-                MediaStore.Images.Media.BUCKET_DISPLAY_NAME };
 
-        cursor = activity.getContentResolver().query(
-                MediaStore.Files.getContentUri("external"),
-                null,
-                MediaStore.Images.Media.DATA + " like ? ",
-                new String[] {"%Screenshots%"},
-                null
-        );
-        column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
-        column_index_folder_name = cursor
-                .getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
-        while (cursor.moveToNext()) {
+        MyDBHandler dbHandler = new MyDBHandler(getContext(), null, null, 1);
+        try {
+            JSONObject json = new JSONObject((dbHandler.findHandler(0).getStudentName()));
+            JSONArray totalarr = json.getJSONArray("total");
+            if (totalarr != null) {
+                for (int i = 0; i< totalarr.length(); i++){
+                    listOfAllImages.add(totalarr.getString(i));
+                }
+            }
 
-            absolutePathOfImage = cursor.getString(column_index_data);
-            listOfAllImages.add(absolutePathOfImage);
 
+        } catch (JSONException e){
+            e.printStackTrace();
         }
+
+
+
         return listOfAllImages;
     }//modified
 

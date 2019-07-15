@@ -83,6 +83,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        FloatingActionButton plus =(FloatingActionButton)findViewById(R.id.plusbtn);
+        plus.setOnClickListener(new Button.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                //System.out.println("0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000");
+                Intent i = new Intent(getApplicationContext(), PreActivity.class);
+                startActivity(i);
+                finish();
+            }
+        });
+
 
 
 //        if(ContextCompat.checkSelfPermission(MainActivity.this, Manifest.permission.READ_CONTACTS)!=PackageManager.PERMISSION_GRANTED) {
@@ -109,7 +120,8 @@ public class MainActivity extends AppCompatActivity {
 //            e.printStackTrace();
 //        }
 
-        checkPermission();
+        //checkPermission();
+        initialize();
     }
 
 

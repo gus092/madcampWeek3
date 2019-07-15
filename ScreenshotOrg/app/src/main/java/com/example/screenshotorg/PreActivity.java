@@ -598,13 +598,13 @@ public class PreActivity extends AppCompatActivity {
             Log.e("Babies: " , mylist.toString());
             for (int i = 0 ; i < mylist.size(); i++){
                 //Object of the item, its
-                JSONObject j = new JSONObject();
-                j.put("path", mylist.get(i)); // j must also have the attributes "categories" and "text"
-                //String[] strarr = {};
-                j.put("categories", "a");
-                j.put("text", "a");
+//                JSONObject j = new JSONObject();
+//                j.put("path", mylist.get(i)); // j must also have the attributes "categories" and "text"
+//                //String[] strarr = {};
+//                j.put("categories", "a");
+//                j.put("text", "a");
                 performCloudVisionRequest1(mylist.get(i));
-                totalarr.put(j);
+//                totalarr.put(j);
 
                 //Make this the last processed photo
                 dbHandler.updateHandler( 10 ,mylist.get(i));
@@ -640,11 +640,24 @@ public class PreActivity extends AppCompatActivity {
         String[] fashion = {"hat", "sunglass", "shirt", "dress", "scarf", "pants","fashion", "shoes", "clothes", "bag"};
         String[] text = {"text", "document"};
 
+        if (filepath.equals("a")) {
+            return;
+        }
+
         int count = 0;
         //Shopping
         try {
             JSONObject json = new JSONObject((dbHandler.findHandler(0).getStudentName()));
             JSONArray foodjson = json.getJSONArray("food");
+            JSONArray totalarr = json.getJSONArray("total");
+
+
+            JSONObject j = new JSONObject();
+            j.put("path", filepath); // j must also have the attributes "categories" and "text"
+
+            JSONArray carray = new JSONArray();
+
+
             //ArrayList<String> arrayList = new ArrayList<String>(Arrays.asList(myArray));
 
             for (String s :food){
@@ -652,6 +665,7 @@ public class PreActivity extends AppCompatActivity {
                     foodjson.put(filepath);
                     json.put("food", foodjson);
                     //dbHandler.updateHandler(0, json.toString()); //For multiple categories this belongs outside
+                    carray.put("food");
                     count++;
                     break;
                 }
@@ -663,6 +677,7 @@ public class PreActivity extends AppCompatActivity {
                 if (containsIgnoreCase(label, s)){
                     shoppingjson.put(filepath);
                     json.put("shopping", shoppingjson);
+                    carray.put("shopping");
                     //dbHandler.updateHandler(0, json.toString()); //For multiple categories this belongs outside
                     count++;
                     break;
@@ -674,6 +689,7 @@ public class PreActivity extends AppCompatActivity {
                 if (containsIgnoreCase(label, s)){
                     placesjson.put(filepath);
                     json.put("places", placesjson);
+                    carray.put("places");
                     //dbHandler.updateHandler(0, json.toString()); //For multiple categories this belongs outside
                     count++;
                     break;
@@ -685,6 +701,7 @@ public class PreActivity extends AppCompatActivity {
                 if (containsIgnoreCase(label, s)){
                     cosmeticjson.put(filepath);
                     json.put("cosmetic", cosmeticjson);
+                    carray.put("cosmetic");
                     //dbHandler.updateHandler(0, json.toString()); //For multiple categories this belongs outside
                     count++;
                     break;
@@ -696,6 +713,7 @@ public class PreActivity extends AppCompatActivity {
                 if (containsIgnoreCase(label, s)){
                     fashionjson.put(filepath);
                     json.put("fashion", fashionjson);
+                    carray.put("fashion");
                     //dbHandler.updateHandler(0, json.toString()); //For multiple categories this belongs outside
                     count++;
                     break;
@@ -707,6 +725,7 @@ public class PreActivity extends AppCompatActivity {
                 if (containsIgnoreCase(label, s)){
                     textjson.put(filepath);
                     json.put("text", textjson);
+                    carray.put("text");
                     //dbHandler.updateHandler(0, json.toString()); //For multiple categories this belongs outside
                     count++;
                     break;
@@ -716,8 +735,15 @@ public class PreActivity extends AppCompatActivity {
             if (count == 0){
                 JSONArray etcjson = json.getJSONArray("etc");
                 etcjson.put(filepath);
+                carray.put("etc");
                 json.put("etc", etcjson);
             }
+
+            j.put("categories", carray);
+            //j.put("text", "a");
+            totalarr.put(j);
+
+            json.put("total", totalarr);
 
             dbHandler.updateHandler(0, json.toString());
 
