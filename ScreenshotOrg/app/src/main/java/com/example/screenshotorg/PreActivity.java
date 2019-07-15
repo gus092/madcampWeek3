@@ -50,6 +50,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -57,6 +58,10 @@ import java.util.Locale;
 
 import com.google.api.services.vision.v1.model.Feature;
 import com.google.api.services.vision.v1.model.Image;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 
 
@@ -246,7 +251,7 @@ public class PreActivity extends AppCompatActivity {
                 if (bitmap == null){
                     Log.e("HEY: ", "bitmap is null");
                 }
-                callCloudVision(bitmap);
+                callCloudVision(bitmap, "a");
                 selectedImage.setImageBitmap(bitmap);
             } catch (IOException e) {
                 Log.e(TAG, e.getMessage());
@@ -256,13 +261,13 @@ public class PreActivity extends AppCompatActivity {
 
     public void performCloudVisionRequest1(String filepath) {
         if (!filepath.equals("")) {
-            //Bitmap bitmap = null;
+            Bitmap bitmap = null;
             try {
-                Bitmap bitmap = resizeBitmap(BitmapFactory.decodeFile(filepath));
+                bitmap = resizeBitmap(BitmapFactory.decodeFile(filepath));
                 if (bitmap == null){
                     Log.e("HEY: ", "bitmap is null");
                 }
-                callCloudVision(bitmap);
+                callCloudVision(bitmap, filepath);
                 selectedImage.setImageBitmap(bitmap);
             } catch (IOException e) {
                 Log.e(TAG, e.getMessage());
@@ -272,7 +277,7 @@ public class PreActivity extends AppCompatActivity {
 
     //In ImageProcessor
     @SuppressLint("StaticFieldLeak")
-    private void callCloudVision(final Bitmap bitmap) throws IOException {
+    private void callCloudVision(final Bitmap bitmap, final String filepath) throws IOException {
         mProgressDialog = ProgressDialog.show(this, null, "Scanning image with Vision API...", true);
         Log.e("gazua : ", "you are here");
         new AsyncTask<Object, Void, BatchAnnotateImagesResponse>() {
@@ -315,7 +320,10 @@ public class PreActivity extends AppCompatActivity {
                     Log.d(TAG, "Sending request to Google Cloud");
 
                     BatchAnnotateImagesResponse response = annotateRequest.execute();
-                    Log.e("my labels: ", getDetectedLabels(response));
+                    String t = getDetectedLabels(response);
+                    Log.e("my labels: ", t);
+                    ///CALL SORT FUNCTION HERE
+                    sort(getDetectedLabels(response), filepath);
                     return response;
 
                 } catch (GoogleJsonResponseException e) {
@@ -330,6 +338,7 @@ public class PreActivity extends AppCompatActivity {
                 mProgressDialog.dismiss();
                 textResults.setText(getDetectedTexts(response));
                 labelResults.setText(getDetectedLabels(response));
+                //sort( getDetectedLabels(response), filepath);
             }
 
         }.execute();
@@ -355,8 +364,7 @@ public class PreActivity extends AppCompatActivity {
     //In ImageProcessor
     private String getDetectedTexts(BatchAnnotateImagesResponse response) {
         StringBuilder message = new StringBuilder("");
-        List<EntityAnnotation> texts = response.getResponses().get(0)
-                .getTextAnnotations();
+        List<EntityAnnotation> texts = response.getResponses().get(0).getTextAnnotations();
         if (texts != null) {
             for (EntityAnnotation text : texts) {
                 message.append(String.format(Locale.getDefault(), "%s: %s",
@@ -427,15 +435,69 @@ public class PreActivity extends AppCompatActivity {
         launchImagePicker();
     }
 
-
     //For first time users only
     private void createDB(){
-        for (int i = 0 ; i < 10 ; i++){
-            Student s = new Student(i, "aa");
-            addStudent(s);
-        }
+        JSONObject json = new JSONObject();
+        //String emptyjsonobj = obj.toString();
+        //ArrayList<String> mylist= new ArrayList<String>();
+        try{
+            JSONArray jArray0 = new JSONArray();
+            json.put("total", jArray0);
 
-        Student last = new Student(10, getLastImagePath());
+//            JSONArray jarray00 = new JSONArray();
+//            json.put("notconfirmed", jarray00);
+
+//            JSONObject allArrays = new JSONObject();
+//            String[] stringarr = {};
+//            allArrays.put("food", stringarr);
+//            //allArrays.put("places", stringarr);
+//            //allArrays.put("cosmetics", stringarr);
+
+            //json.put("all", allArrays);
+//
+            JSONArray jArray1 = new JSONArray();
+            json.put("shopping", jArray1);
+
+            JSONArray jArray2 = new JSONArray();
+            json.put("food", jArray2);
+
+            JSONArray jArray3 = new JSONArray();
+            json.put("places", jArray3);
+
+            JSONArray jArray4 = new JSONArray();
+            json.put("cosmetic", jArray4);
+
+            JSONArray jArray5 = new JSONArray();
+            json.put("fashion", jArray5);
+
+            JSONArray jArray6 = new JSONArray();
+            json.put("text", jArray6);
+
+            JSONArray jArray7 = new JSONArray();
+            json.put("celebrities", jArray7);
+
+            JSONArray jArray8 = new JSONArray();
+            json.put("etc", jArray8);
+
+//            JSONObject last = new JSONObject();
+//            json.put("last", last);
+
+        } catch (JSONException e) {
+            e.printStackTrace();
+        }
+        Student init = new Student (0, json.toString());
+        addStudent(init);
+        //json.put("total", new JSONArray(mylist));
+
+//        for (int i = 0 ; i < 10; i ++){
+//            json.put()
+//        }
+//        for (int i = 0 ; i < 10 ; i++){
+//            Student s = new Student(i, emptyjsonobj);
+//            addStudent(s);
+//        }
+
+        Student last = new Student(10, getLastImagePath()); //Last image processed is item 10
         addStudent(last);
         Toast.makeText(PreActivity.this, "DB Created!", Toast.LENGTH_SHORT).show();
 
@@ -518,15 +580,154 @@ public class PreActivity extends AppCompatActivity {
         return imagesToProcess;
 
     }
-    public void updateDB(){
-        ArrayList<String> mylist = toProcess();
-        Log.e("Babies: " , mylist.toString());
-        for (int i = 0 ; i < mylist.size(); i++){
-            performCloudVisionRequest1(mylist.get(i));
-        }
 
-        Log.e("Finished my thing: ","hey you're done");
+    public void updateDB(){
+
+        MyDBHandler dbHandler = new MyDBHandler(this, null, null, 1);
+        try {
+            JSONObject json = new JSONObject((dbHandler.findHandler(0).getStudentName()));
+            JSONArray totalarr = json.getJSONArray("total");
+
+//            JSONObject a = new JSONObject();
+//            String[] myArray = {"a","b"};
+//            ArrayList<String> arrayList = new ArrayList<String>(Arrays.asList(myArray));
+//            a.put("myarray", myArray);
+
+
+            ArrayList<String> mylist = toProcess(); //list of filepath
+            Log.e("Babies: " , mylist.toString());
+            for (int i = 0 ; i < mylist.size(); i++){
+                //Object of the item, its
+                JSONObject j = new JSONObject();
+                j.put("path", mylist.get(i)); // j must also have the attributes "categories" and "text"
+                //String[] strarr = {};
+                j.put("categories", "a");
+                j.put("text", "a");
+                performCloudVisionRequest1(mylist.get(i));
+                totalarr.put(j);
+
+                //Make this the last processed photo
+                dbHandler.updateHandler( 10 ,mylist.get(i));
+
+                //Add each to JSON "total"
+                //Add each to JSON "unconfirmed"
+
+
+            }
+
+            json.put("total", totalarr);
+            dbHandler.updateHandler(0, json.toString());
+            Log.e("Finished my thing: ","hey you're done");
+            Log.e("Print current state1", json.toString());
+        } catch (JSONException e){
+            e.printStackTrace();
+        }
+        //mylist (String list of filepaths)
+
+
     }
 
+    public static boolean containsIgnoreCase(String str, String subString) {
+        return str.toLowerCase().contains(subString.toLowerCase());
+    }
+
+    public void sort(String label, String filepath){ //take care of error above
+        MyDBHandler dbHandler = new MyDBHandler(this, null, null, 1);
+        String[] shopping = {"perfume", "cosmetic", "clothes", "jewelry", "shoes", "shopping", "product"};
+        String[] food= {"fruit", "food", "dish", "cuisine","kitchen"};
+        String[] places = {"city", "tourist","landmark", "metropolis", "vacation", "beach", "sea", "island", "tourism", "caribbean", "mountain", "nature", "tree"};
+        String[] cosmetics = {"cosmetic", "lip", "eyeshadow", "tint", "beauty", "perfume", "blush", "mascara", "foundation", "product", "skin care"};
+        String[] fashion = {"hat", "sunglass", "shirt", "dress", "scarf", "pants","fashion", "shoes", "clothes", "bag"};
+        String[] text = {"text", "document"};
+
+        int count = 0;
+        //Shopping
+        try {
+            JSONObject json = new JSONObject((dbHandler.findHandler(0).getStudentName()));
+            JSONArray foodjson = json.getJSONArray("food");
+            //ArrayList<String> arrayList = new ArrayList<String>(Arrays.asList(myArray));
+
+            for (String s :food){
+                if (containsIgnoreCase(label, s)){
+                    foodjson.put(filepath);
+                    json.put("food", foodjson);
+                    //dbHandler.updateHandler(0, json.toString()); //For multiple categories this belongs outside
+                    count++;
+                    break;
+                }
+            }
+
+            JSONArray shoppingjson = json.getJSONArray("shopping");
+
+            for (String s :shopping){
+                if (containsIgnoreCase(label, s)){
+                    shoppingjson.put(filepath);
+                    json.put("shopping", shoppingjson);
+                    //dbHandler.updateHandler(0, json.toString()); //For multiple categories this belongs outside
+                    count++;
+                    break;
+                }
+            }
+
+            JSONArray placesjson = json.getJSONArray("places");
+            for (String s :places){
+                if (containsIgnoreCase(label, s)){
+                    placesjson.put(filepath);
+                    json.put("places", placesjson);
+                    //dbHandler.updateHandler(0, json.toString()); //For multiple categories this belongs outside
+                    count++;
+                    break;
+                }
+            }
+
+            JSONArray cosmeticjson = json.getJSONArray("cosmetic");
+            for (String s :cosmetics){
+                if (containsIgnoreCase(label, s)){
+                    cosmeticjson.put(filepath);
+                    json.put("cosmetic", cosmeticjson);
+                    //dbHandler.updateHandler(0, json.toString()); //For multiple categories this belongs outside
+                    count++;
+                    break;
+                }
+            }
+
+            JSONArray fashionjson = json.getJSONArray("fashion");
+            for (String s :fashion){
+                if (containsIgnoreCase(label, s)){
+                    fashionjson.put(filepath);
+                    json.put("fashion", fashionjson);
+                    //dbHandler.updateHandler(0, json.toString()); //For multiple categories this belongs outside
+                    count++;
+                    break;
+                }
+            }
+
+            JSONArray textjson = json.getJSONArray("text");
+            for (String s :text){
+                if (containsIgnoreCase(label, s)){
+                    textjson.put(filepath);
+                    json.put("text", textjson);
+                    //dbHandler.updateHandler(0, json.toString()); //For multiple categories this belongs outside
+                    count++;
+                    break;
+                }
+            }
+
+            if (count == 0){
+                JSONArray etcjson = json.getJSONArray("etc");
+                etcjson.put(filepath);
+                json.put("etc", etcjson);
+            }
+
+            dbHandler.updateHandler(0, json.toString());
+
+            Log.e("Print current state", json.toString());
+
+            //dbHandler.updateHandler(2, foodjson.toString());
+        } catch(JSONException e){
+            e.printStackTrace();
+        }
+
+    }
 
 }
