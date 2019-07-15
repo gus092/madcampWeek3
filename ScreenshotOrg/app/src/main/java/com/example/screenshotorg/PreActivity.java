@@ -1,7 +1,7 @@
 package com.example.screenshotorg;
 
 //CLOUD VISION
-
+///PRACTICE COMMIT
 import android.Manifest;
 import android.accounts.Account;
 import android.accounts.AccountManager;
