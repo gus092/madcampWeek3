@@ -32,7 +32,8 @@ public class SearchActivity extends Activity {
     List<Item> productlists = new ArrayList<>();
     public androidx.appcompat.widget.SearchView searchView;
     Fragment2Adapter adapter3;
-    private static ArrayList<String> images3;
+    public static ArrayList<String> images3;
+    ArrayList<String> tlist;
 
 
 
@@ -76,13 +77,25 @@ public class SearchActivity extends Activity {
                 break;
         }
         ArrayList<String> myimagelist = new ArrayList<String>();
+        ArrayList<String> mytextlist = new ArrayList<String>();
         MyDBHandler dbHandler = new MyDBHandler(this, null, null, 1);
         try {
             JSONObject json = new JSONObject((dbHandler.findHandler(0).getStudentName()));
             JSONArray myType = json.getJSONArray(mycatname);
+            JSONArray total = json.getJSONArray("total");
             for (int i = 0; i < myType.length(); i ++){
                 myimagelist.add(myType.get(i).toString());
             }
+            for (int j = 0; j <myimagelist.size();j++){
+                for (int i = 0; i<total.length(); i++){
+                    JSONObject currobj = total.getJSONObject(i);
+                    if (currobj.get("path").toString().equals(myimagelist.get(j))){
+                        mytextlist.add(currobj.get("text").toString());
+                    }
+
+                }
+            }
+
 
         } catch (JSONException e){
             e.printStackTrace();
@@ -107,9 +120,11 @@ public class SearchActivity extends Activity {
 //        productlists.add(new Item("nine dog 9999 ",R.drawable.dog9));
 
         images3 = myimagelist;//getAllShownImagesPath(this);
-
+        tlist = mytextlist;
+        //JSONArray total =
         for (int i=0; i<images3.size();i++){ //images에는 원하는 사진의 절대경로를 넣으면 됨
-            productlists.add(new Item("#추천 tag를 달아주세요", BitmapFactory.decodeFile(images3.get(i))));
+
+            productlists.add(new Item(tlist.get(i), BitmapFactory.decodeFile(images3.get(i))));
         }
 
         //modified

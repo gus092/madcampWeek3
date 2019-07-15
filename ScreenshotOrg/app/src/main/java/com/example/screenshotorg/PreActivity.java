@@ -116,8 +116,8 @@ public class PreActivity extends AppCompatActivity {
 
         Button selectImageButton = findViewById(R.id.select_image_button);
         selectedImage = findViewById(R.id.selected_image);
-        labelResults = findViewById(R.id.tv_label_results);
-        textResults = findViewById(R.id.tv_texts_results);
+        //labelResults = findViewById(R.id.tv_label_results);
+        //textResults = findViewById(R.id.tv_texts_results);
         Button next = findViewById(R.id.next);
         next.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -281,6 +281,11 @@ public class PreActivity extends AppCompatActivity {
         mProgressDialog = ProgressDialog.show(this, null, "Scanning image with Vision API...", true);
         Log.e("gazua : ", "you are here");
         new AsyncTask<Object, Void, BatchAnnotateImagesResponse>() {
+//            @Override
+//            protected void onPreExecute(){
+//
+//            }
+
             @Override
             protected BatchAnnotateImagesResponse doInBackground(Object... params) {
                 try {
@@ -323,7 +328,7 @@ public class PreActivity extends AppCompatActivity {
                     String t = getDetectedLabels(response);
                     Log.e("my labels: ", t);
                     ///CALL SORT FUNCTION HERE
-                    sort(getDetectedLabels(response), filepath);
+                    sort(getDetectedLabels(response), getDetectedTexts(response), filepath);
                     return response;
 
                 } catch (GoogleJsonResponseException e) {
@@ -331,13 +336,14 @@ public class PreActivity extends AppCompatActivity {
                 } catch (IOException e) {
                     Log.d(TAG, "Request error: " + e.getMessage());
                 }
+                mProgressDialog.dismiss();
                 return null;
             }
 
             protected void onPostExecute(BatchAnnotateImagesResponse response) {
                 mProgressDialog.dismiss();
-                textResults.setText(getDetectedTexts(response));
-                labelResults.setText(getDetectedLabels(response));
+                //textResults.setText(getDetectedTexts(response));
+                //labelResults.setText(getDetectedLabels(response));
                 //sort( getDetectedLabels(response), filepath);
             }
 
@@ -367,9 +373,10 @@ public class PreActivity extends AppCompatActivity {
         List<EntityAnnotation> texts = response.getResponses().get(0).getTextAnnotations();
         if (texts != null) {
             for (EntityAnnotation text : texts) {
-                message.append(String.format(Locale.getDefault(), "%s: %s",
-                        text.getLocale(), text.getDescription()));
-                message.append("\n");
+//                message.append(String.format(Locale.getDefault(), "%s: %s",
+//                        text.getLocale(), text.getDescription()));
+                message.append((text.getDescription()));
+                //message.append("\n");
             }
         } else {
             message.append("nothing\n");
@@ -619,6 +626,10 @@ public class PreActivity extends AppCompatActivity {
             dbHandler.updateHandler(0, json.toString());
             Log.e("Finished my thing: ","hey you're done");
             Log.e("Print current state1", json.toString());
+
+//            if (mProgressDialog != null){
+//                mProgressDialog.dismiss();
+//            }
         } catch (JSONException e){
             e.printStackTrace();
         }
@@ -631,7 +642,7 @@ public class PreActivity extends AppCompatActivity {
         return str.toLowerCase().contains(subString.toLowerCase());
     }
 
-    public void sort(String label, String filepath){ //take care of error above
+    public void sort(String label, String ocrtext, String filepath){ //take care of error above
         MyDBHandler dbHandler = new MyDBHandler(this, null, null, 1);
         String[] shopping = {"perfume", "cosmetic", "clothes", "jewelry", "shoes", "shopping", "product"};
         String[] food= {"fruit", "food", "dish", "cuisine","kitchen"};
@@ -753,6 +764,7 @@ public class PreActivity extends AppCompatActivity {
             }
 
             j.put("categories", carray);
+            j.put("text", ocrtext);
             //j.put("text", "a");
             totalarr.put(j);
 
@@ -761,7 +773,9 @@ public class PreActivity extends AppCompatActivity {
             dbHandler.updateHandler(0, json.toString());
 
             Log.e("Print current state", json.toString());
-
+//            if (mProgressDialog != null){
+//                mProgressDialog.dismiss();
+//            }
             //dbHandler.updateHandler(2, foodjson.toString());
         } catch(JSONException e){
             e.printStackTrace();

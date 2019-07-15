@@ -13,12 +13,16 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.SearchView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 
 import com.bumptech.glide.Glide;
 import com.example.screenshotorg.R;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 import org.w3c.dom.Text;
 
 import java.io.File;
@@ -28,7 +32,10 @@ import java.util.Arrays;
 import java.util.List;
 
 public class SearchPage extends AppCompatActivity {
-    private List<String> items = Arrays.asList("어벤져스","배트맨" ,"배트맨2","배구","슈퍼맨","개미","달팽이","새우");
+    private List<String> items = new ArrayList<String>(); //Arrays.asList("어벤져스","배트맨" ,"배트맨2","배구","슈퍼맨","개미","달팽이","새우");
+    private int wannabe = 0;
+    private String goalPath = "";
+    private ArrayList<String> patharray;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -38,31 +45,65 @@ public class SearchPage extends AppCompatActivity {
         final TextView resultTextView = findViewById(R.id.textView);
         resultTextView.setText(getResult());
 
+        items = new ArrayList<String>();
+        patharray = new ArrayList<String>();
+
+        MyDBHandler dbHandler = new MyDBHandler(this, null, null, 1);
+
+        try {
+            JSONObject json = new JSONObject((dbHandler.findHandler(0).getStudentName()));
+            JSONArray totaljson = json.getJSONArray("total");
+            for (int i = 0; i < totaljson.length(); i ++){
+                JSONObject currobj = totaljson.getJSONObject(i);
+                items.add(currobj.get("text").toString());
+                patharray.add(currobj.get("path").toString());
+
+            }
+
+        } catch (JSONException e){
+            e.printStackTrace();
+        }
+
+
 
         searchView.setOnQueryTextListener(new SearchView.OnQueryTextListener(){
-        @Override
-        public boolean onQueryTextSubmit(String s) {
-            return false; }
+            @Override
+            public boolean onQueryTextSubmit(String s) {
+                return false; }
 
-        @Override
-        public boolean onQueryTextChange(String s) {
-            resultTextView.setText(search(s));
-            return true;
-        }
-    });
+            @Override
+            public boolean onQueryTextChange(String s) {
+                resultTextView.setText(search(s));
+                return true;
+            }
+        });
     }
     private String search (String query){
         StringBuilder sb = new StringBuilder();
         for(int i=0;i<items.size();i++){
             String item = items.get(i);
             if(item.toLowerCase().contains(query.toLowerCase())){
-                sb.append(item);
+                sb.append(shorten(item));
+                goalPath = patharray.get(i);
                 if(i != items.size()-1){
                     sb.append("\n");
-            }
+                 }
             }
         }
         return sb.toString();
+    }
+
+    private String shorten(String orig){
+        int len = orig.length();
+        if (len < 40){
+            return orig;
+        }
+
+        if (len <120 ){
+            return orig.substring((len - 40) /2, (len-40)/2 +39);
+        }
+        return orig.substring (len / 3, len/3 + 40);
+
     }
 
     private String getResult(){
@@ -70,7 +111,7 @@ public class SearchPage extends AppCompatActivity {
         for(int i=0;i<items.size();i++){
             String item = items.get(i);
             if(i ==items.size()-1){
-                sb.append(item);
+                sb.append(shorten(item));
             }else{
                 sb.append("\n");
             }
@@ -79,7 +120,13 @@ public class SearchPage extends AppCompatActivity {
     }
 
     public void OnClick(View view) {
-    System.out.println("OOOOOOOOOOOOOOOCCCCCCCCCCCCCCCLLLICKKKKKKKKKKK");
+        Toast.makeText(this, "Path: " + goalPath, Toast.LENGTH_SHORT).show();
+
+        Intent intent = new Intent(view.getContext(), FullImageActivity.class);
+        intent.putExtra("fullsize",goalPath);
+        view.getContext().startActivity(intent);
+
+        System.out.println("OOOOOOOOOOOOOOOCCCCCCCCCCCCCCCLLLICKKKKKKKKKKK");
     }
 }
 

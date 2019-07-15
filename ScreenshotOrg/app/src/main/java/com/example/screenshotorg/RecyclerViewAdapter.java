@@ -12,10 +12,10 @@ import java.util.List;
 
 public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHolders> {
 
-    private List<Item> itemList;
+    private List<Fragment2Item> itemList;
     private Context context;
 
-    public RecyclerViewAdapter(Context context, List<Item> itemList) {
+    public RecyclerViewAdapter(Context context, List<Fragment2Item> itemList) {
         this.itemList = itemList;
         this.context = context;
     }
@@ -32,7 +32,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHolder
     public void onBindViewHolder(RecyclerViewHolders holder, int position) {
         holder.countryName.setText(itemList.get(position).getName());
        // holder.countryPhoto.setImageResource(itemList.get(position).getPhoto());
-        holder.countryPhoto.setImageBitmap(itemList.get(position).getPhoto());
+        holder.countryPhoto.setImageResource(itemList.get(position).getPhoto());
     }
 
     @Override

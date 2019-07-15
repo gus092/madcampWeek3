@@ -21,7 +21,7 @@ public class FullImageActivity extends AppCompatActivity {
 
         Intent i = getIntent();
 
-        String path = i.getStringExtra("path");
+        String path = i.getStringExtra("fullsize");
 
         ImageView GalleryPreviewImg = (ImageView) findViewById(R.id.full_image_view2);
         GalleryPreviewImg.bringToFront();

@@ -11,99 +11,103 @@
     android:paddingTop="16dp"
     tools:context=".PreActivity">
 
-    <TextView
-        android:id="@+id/selected_image_txt"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:textStyle="bold"
-        android:textSize="20sp"
-        android:gravity="center"
-        android:text="Selected Image "/>
+    <!--<TextView-->
+        <!--android:id="@+id/selected_image_txt"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_alignParentTop="true"-->
+        <!--android:textStyle="bold"-->
+        <!--android:textSize="20sp"-->
+        <!--android:gravity="center"-->
+        <!--android:text="Selected Image "/>-->
 
     <ImageView
         android:id="@+id/selected_image"
         android:layout_width="wrap_content"
-        android:layout_height="200dp"
-        android:layout_below="@+id/selected_image_txt"
+        android:layout_height="300dp"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="10dp"/>
+        android:layout_marginTop="10dp" />
 
-    <TextView
-        android:id="@+id/labels"
-        android:text="Labels:"
-        android:textStyle="bold"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/selected_image"
-        android:layout_marginTop="10dp"/>
+    <!--<TextView-->
+        <!--android:id="@+id/labels"-->
+        <!--android:text="Labels:"-->
+        <!--android:textStyle="bold"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_below="@+id/selected_image"-->
+        <!--android:layout_marginTop="10dp"/>-->
 
-    <TextView
-        android:id="@+id/tv_label_results"
-        android:text="-"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/labels"
-        android:layout_marginTop="10dp"/>
+    <!--<TextView-->
+        <!--android:id="@+id/tv_label_results"-->
+        <!--android:text="-"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_below="@+id/labels"-->
+        <!--android:layout_marginTop="10dp"/>-->
 
-    <TextView
-        android:id="@+id/texts"
-        android:text="Texts:"
-        android:textStyle="bold"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/tv_label_results"
-        android:layout_marginTop="10dp"/>
+    <!--<TextView-->
+        <!--android:id="@+id/texts"-->
+        <!--android:text="Texts:"-->
+        <!--android:textStyle="bold"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_below="@+id/tv_label_results"-->
+        <!--android:layout_marginTop="10dp"/>-->
 
-    <TextView
-        android:id="@+id/tv_texts_results"
-        android:text="-"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_below="@+id/texts"
-        android:layout_marginTop="10dp"/>
-
-    <Button
-        android:id="@+id/select_image_button"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentBottom="true"
-        android:layout_centerHorizontal="true"
-        android:text="Choose an Image"/>
+    <!--<TextView-->
+        <!--android:id="@+id/tv_texts_results"-->
+        <!--android:text="-"-->
+        <!--android:layout_width="match_parent"-->
+        <!--android:layout_height="wrap_content"-->
+        <!--android:layout_below="@+id/texts"-->
+        <!--android:layout_marginTop="10dp"/>-->
 
     <androidx.constraintlayout.widget.ConstraintLayout
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
         <Button
-            android:id="@+id/update"
-            android:layout_width="wrap_content"
+            android:id="@+id/select_image_button"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:layout_marginBottom="88dp"
+            android:layout_marginBottom="16dp"
+            android:text="Choose an Image"
+            app:layout_constraintBottom_toTopOf="@+id/firsttime"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent" />
+
+        <Button
+            android:id="@+id/update"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:layout_marginBottom="16dp"
             android:text="Update"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/next"
             app:layout_constraintEnd_toEndOf="parent"
             app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent" />
 
         <Button
             android:id="@+id/firsttime"
-            android:layout_width="wrap_content"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:layout_marginStart="8dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="16dp"
             android:text="First Time"
-            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintBottom_toTopOf="@+id/update"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
             app:layout_constraintStart_toStartOf="parent" />
 
         <Button
             android:id="@+id/next"
-            android:layout_width="wrap_content"
+            android:layout_width="200dp"
             android:layout_height="wrap_content"
-            android:layout_marginEnd="8dp"
-            android:layout_marginBottom="8dp"
+            android:layout_marginBottom="16dp"
             android:text="Skip"
             app:layout_constraintBottom_toBottomOf="parent"
-            app:layout_constraintEnd_toEndOf="parent" />
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintHorizontal_bias="0.5"
+            app:layout_constraintStart_toStartOf="parent" />
     </androidx.constraintlayout.widget.ConstraintLayout>
 </RelativeLayout>

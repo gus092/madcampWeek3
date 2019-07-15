@@ -18,6 +18,8 @@ import androidx.recyclerview.widget.RecyclerView;
 import java.util.ArrayList;
 import java.util.List;
 
+import static com.example.screenshotorg.SearchActivity.images3;
+
 public class Fragment2Adapter extends RecyclerView.Adapter<Fragment2Adapter.Holderview>{
 
     private List<Item> productlist;
@@ -48,9 +50,9 @@ public class Fragment2Adapter extends RecyclerView.Adapter<Fragment2Adapter.Hold
             @Override
             public void onClick(View view){
                 Toast.makeText(context,"click on"+productlist.get(position).getName(),Toast.LENGTH_LONG).show();
-//                Intent intent = new Intent(view.getContext(), SearchActivity.class);
-//                intent.putExtra("dirname",productlist.get(position).getName());
-//                view.getContext().startActivity(intent);
+                Intent intent = new Intent(view.getContext(), FullImageActivity.class);
+                intent.putExtra("fullsize",images3.get(position));
+                view.getContext().startActivity(intent);
 
 
             }
