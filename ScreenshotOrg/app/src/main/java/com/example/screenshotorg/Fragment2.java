@@ -51,7 +51,7 @@ public class Fragment2 extends Fragment {
         //topToolBar.setLogo(R.drawable.logo);
         //topToolBar.setLogoDescription(getResources().getString(R.string.logo_desc));
 
-        List<Item> rowListItem = getAllItemList();
+        List<Fragment2Item> rowListItem = getAllItemList();
         lLayout = new GridLayoutManager(requireContext(), 3);//category spancount
 
         RecyclerView rView = (RecyclerView)view.findViewById(R.id.recycler_view);
@@ -95,9 +95,10 @@ public class Fragment2 extends Fragment {
         return super.onOptionsItemSelected(item);
     }
 
-    private List<Item> getAllItemList(){
+    private List<Fragment2Item> getAllItemList(){
 
-        List<Item> allItems = new ArrayList<Item>();
+
+        List<Fragment2Item> allItems = new ArrayList<Fragment2Item>();
 
 //        allItems.add(new Item("United States", R.drawable.one));
 //        allItems.add(new Item("Canada", R.drawable.two));
@@ -110,9 +111,17 @@ public class Fragment2 extends Fragment {
         //modified
         images2 = getAllShownImagesPath(requireContext());
         String[] categories = {"", "Shopping", "Food", "Places", "Cosmetic", "Fashion","Text","Celebrities","Etc"};
-        for (int i=1; i<9;i++){ //images에는 원하는 사진의 절대경로를 넣으면 됨 //images2.size()로 바꾸기!
+        for (int i=0; i<8;i++){ //images에는 원하는 사진의 절대경로를 넣으면 됨 //images2.size()로 바꾸기!
             //allItems.add(new Item("#추천 tag를 달아주세요", BitmapFactory.decodeFile(images2.get(i))));
-            allItems.add(new Item(categories[i], BitmapFactory.decodeFile(images2.get(i))));
+            allItems.add(new Fragment2Item("SHOPPING", R.drawable.shopping));
+            allItems.add(new Fragment2Item("FOOD", R.drawable.dish));
+            allItems.add(new Fragment2Item("PLACES", R.drawable.beach));
+            allItems.add(new Fragment2Item("COSMETICS", R.drawable.cosmetics));
+            allItems.add(new Fragment2Item("FASHION", R.drawable.fashion));
+            allItems.add(new Fragment2Item("TEXT",R.drawable.text_document));
+            allItems.add(new Fragment2Item("CELEBRITIES", R.drawable.talent));
+            allItems.add(new Fragment2Item("ETC",R.drawable.controls));
+
         }
 
 

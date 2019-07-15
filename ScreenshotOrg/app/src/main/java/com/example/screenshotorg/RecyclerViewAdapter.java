@@ -15,7 +15,7 @@ public class RecyclerViewAdapter extends RecyclerView.Adapter<RecyclerViewHolder
     private List<Item> itemList;
     private Context context;
 
-    public RecyclerViewAdapter(Context context, List<Item> itemList) {
+    public RecyclerViewAdapter(Context context, List<Fragment2Item> itemList) {
         this.itemList = itemList;
         this.context = context;
     }
