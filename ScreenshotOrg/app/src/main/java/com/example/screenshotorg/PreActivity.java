@@ -637,7 +637,7 @@ public class PreActivity extends AppCompatActivity {
 
 
     }
-
+//p
     public static boolean containsIgnoreCase(String str, String subString) {
         return str.toLowerCase().contains(subString.toLowerCase());
     }
@@ -776,7 +776,7 @@ public class PreActivity extends AppCompatActivity {
 //            if (mProgressDialog != null){
 //                mProgressDialog.dismiss();
 //            }
-            //dbHandler.updateHandler(2, foodjson.toString());
+            dbHandler.updateHandler(2, foodjson.toString());
         } catch(JSONException e){
             e.printStackTrace();
         }
