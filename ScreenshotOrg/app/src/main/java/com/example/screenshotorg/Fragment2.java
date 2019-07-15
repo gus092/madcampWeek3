@@ -109,8 +109,8 @@ public class Fragment2 extends Fragment {
 //        allItems.add(new Item("Sweden", R.drawable.eight));
         //modified
         images2 = getAllShownImagesPath(requireContext());
-        String[] categories = {"", "Shopping", "Food", "Places", "Cosmetic", "Fashion","Recipe","Celebrities","Messages","Etc"};
-        for (int i=1; i<10;i++){ //images에는 원하는 사진의 절대경로를 넣으면 됨 //images2.size()로 바꾸기!
+        String[] categories = {"", "Shopping", "Food", "Places", "Cosmetic", "Fashion","Text","Celebrities","Etc"};
+        for (int i=1; i<9;i++){ //images에는 원하는 사진의 절대경로를 넣으면 됨 //images2.size()로 바꾸기!
             //allItems.add(new Item("#추천 tag를 달아주세요", BitmapFactory.decodeFile(images2.get(i))));
             allItems.add(new Item(categories[i], BitmapFactory.decodeFile(images2.get(i))));
         }
