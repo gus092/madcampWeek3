@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical">
+
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <CheckedTextView
+                android:id="@+id/simpleCheckedTextView"
+                android:layout_width="fill_parent"
+                android:layout_height="50dp"
+                android:layout_marginTop="8dp"
+                android:layout_marginEnd="8dp"
+                android:checked="false"
+                android:gravity="center_vertical"
+                android:paddingLeft="15dp"
+                android:text="Checked Text View Example"
+                android:textColor="#000"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+            <ImageView
+                android:id="@+id/checkImage"
+                android:layout_width="25dp"
+                android:layout_height="29dp"
+                android:layout_marginEnd="8dp"
+                app:layout_constraintBottom_toBottomOf="@+id/simpleCheckedTextView"
+                app:layout_constraintEnd_toEndOf="@+id/simpleCheckedTextView"
+                app:layout_constraintTop_toTopOf="@+id/simpleCheckedTextView"
+                app:srcCompat="@color/white" />
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </FrameLayout>
+
+    <!-- CheckedTextView In Android -->
+</LinearLayout>

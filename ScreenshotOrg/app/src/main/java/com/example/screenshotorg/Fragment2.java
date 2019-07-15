@@ -1,149 +1,159 @@
 package com.example.screenshotorg;
 
+
+import android.content.Context;
+import android.database.Cursor;
+import android.graphics.BitmapFactory;
+import android.net.Uri;
 import android.os.Bundle;
+import android.provider.MediaStore;
+import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MenuInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
-import android.widget.EditText;
-import android.widget.TextView;
 
-import androidx.annotation.Nullable;
-import androidx.annotation.NonNull;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Toast;
+
+import androidx.appcompat.app.AppCompatActivity;
+import androidx.appcompat.widget.Toolbar;
 import androidx.fragment.app.Fragment;
-import androidx.lifecycle.Observer;
-import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.GridLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
-import com.example.screenshotorg.R;
-import com.example.screenshotorg.ui.main.PageViewModel;
+import java.util.ArrayList;
+import java.util.List;
 
-/**
- * A placeholder fragment containing a simple view.
- */
+
 public class Fragment2 extends Fragment {
 
-    TextView lst;
-    EditText studentid;
-    EditText studentname;
-    Button loadbtn, addbtn, findbtn, deletebtn, updatebtn;
+    private GridLayoutManager lLayout;
+       private static ArrayList<String> images2;
 
 
 
-    @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        pageViewModel = ViewModelProviders.of(this).get(PageViewModel.class);
-//        int index = 1;
-//        if (getArguments() != null) {
-//            index = getArguments().getInt(ARG_SECTION_NUMBER);
-//        }
-//        pageViewModel.setIndex(index);
     }
-
     @Override
-    public View onCreateView(
-            @NonNull LayoutInflater inflater, ViewGroup container,
-            Bundle savedInstanceState) {
+    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+
         View view = inflater.inflate(R.layout.twofragment, container, false);
-        lst = (TextView) view.findViewById(R.id.list);
-        studentid = (EditText) view.findViewById(R.id.studentID);
-        studentname = (EditText) view.findViewById(R.id.studentName);
-        loadbtn = view.findViewById(R.id.btnload);
-        loadbtn.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view){
-                loadStudents(view);
-            }
-        });
-        addbtn = view.findViewById(R.id.btnadd);
-        addbtn.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view){
-                addStudent(view);
-            }
-        });
-        findbtn = view.findViewById(R.id.btnfind);
-        findbtn.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view){
-                findStudent(view);
-            }
-        });
-        deletebtn = view.findViewById(R.id.btndelete);
-        deletebtn.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view){
-                deleteStudent(view);
-            }
-        });
-        updatebtn = view.findViewById(R.id.btnupdate);
-        updatebtn.setOnClickListener(new View.OnClickListener(){
-            @Override
-            public void onClick(View view){
-                updateStudent(view);
-            }
-        });
-//        final TextView textView = root.findViewById(R.id.section_label);
-//        pageViewModel.getText().observe(this, new Observer<String>() {
-//            @Override
-//            public void onChanged(@Nullable String s) {
-//                textView.setText(s);
-//            }
-//        });
+
+        Toolbar topToolBar = (Toolbar)view.findViewById(R.id.toolbar);
+        //setSupportActionBar(topToolBar);
+        ((AppCompatActivity)getActivity()).setSupportActionBar(topToolBar);
+        //topToolBar.setLogo(R.drawable.logo);
+        //topToolBar.setLogoDescription(getResources().getString(R.string.logo_desc));
+
+        List<Item> rowListItem = getAllItemList();
+        lLayout = new GridLayoutManager(requireContext(), 3);//category spancount
+
+        RecyclerView rView = (RecyclerView)view.findViewById(R.id.recycler_view);
+        rView.setHasFixedSize(true);
+        rView.setLayoutManager(lLayout);
+
+
+        RecyclerViewAdapter rcAdapter = new RecyclerViewAdapter(requireContext(), rowListItem);
+        rView.setAdapter(rcAdapter);
         return view;
     }
 
-    public void addStudent (View view) {
-        MyDBHandler dbHandler = new MyDBHandler(this.getContext(), null, null, 1);
-        int id = Integer.parseInt(studentid.getText().toString());
-        String name = studentname.getText().toString();
-        Student student = new Student(id,name);
-        dbHandler.addHandler(student);
-        studentid.setText("");
-        studentname.setText("");
+
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        // Inflate the menu; this adds items to the action bar if it is present.
+        //getMenuInflater().inflate(R.menu.menu, menu);
+        super.onCreateOptionsMenu(menu, inflater);
+       // return true;
     }
 
-    public void findStudent (View view) {
-        MyDBHandler dbHandler = new MyDBHandler(this.getContext(), null, null, 1);
-        Student student = dbHandler.findHandler(Integer.parseInt(studentid.getText().toString()));
-        if (student != null) {
-            lst.setText(String.valueOf(student.getID()) +" "+ student.getStudentName());
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
 
-        } else {
-            lst.setText("No Match Found");
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_settings) {
+            return true;
         }
+        if(id == R.id.action_refresh){
+            Toast.makeText(requireContext(), "Refresh App", Toast.LENGTH_LONG).show();
+        }
+        if(id == R.id.action_new){
+            Toast.makeText(requireContext(), "Create Text", Toast.LENGTH_LONG).show();
+        }
+
+        return super.onOptionsItemSelected(item);
     }
 
-    public void loadStudents(View view) {
-        MyDBHandler dbHandler = new MyDBHandler(this.getContext(), null, null, 1);
-        lst.setText(dbHandler.loadHandler());
-        studentid.setText("");
-        studentname.setText("");
-    }
+    private List<Item> getAllItemList(){
 
-    public void deleteStudent(View view) {
-        MyDBHandler dbHandler = new MyDBHandler(this.getContext(), null,
-                null, 1);
-        boolean result = dbHandler.deleteHandler(Integer.parseInt(
-                studentid.getText().toString()));
-        if (result) {
-            studentid.setText("");
-            studentname.setText("");
-            lst.setText("Record Deleted");
-        } else
-            studentid.setText("No Match Found");
-    }
+        List<Item> allItems = new ArrayList<Item>();
 
-    public void updateStudent(View view) {
-        MyDBHandler dbHandler = new MyDBHandler(this.getContext(), null,
-                null, 1);
-        boolean result = dbHandler.updateHandler(Integer.parseInt(
-                studentid.getText().toString()), studentname.getText().toString());
-        if (result) {
-            studentid.setText("");
-            studentname.setText("");
-            lst.setText("Record Updated");
-        } else
-            studentid.setText("No Match Found");
+//        allItems.add(new Item("United States", R.drawable.one));
+//        allItems.add(new Item("Canada", R.drawable.two));
+//        allItems.add(new Item("United Kingdom", R.drawable.three));
+//        allItems.add(new Item("Germany", R.drawable.four));
+//        allItems.add(new Item("Sweden", R.drawable.five));
+//        allItems.add(new Item("United Kingdom", R.drawable.six));
+//        allItems.add(new Item("Germany", R.drawable.seven));
+//        allItems.add(new Item("Sweden", R.drawable.eight));
+        //modified
+        images2 = getAllShownImagesPath(requireContext());
+        String[] categories = {"", "Shopping", "Food", "Places", "Cosmetic", "Fashion","Text","Celebrities","Etc"};
+        for (int i=1; i<9;i++){ //images에는 원하는 사진의 절대경로를 넣으면 됨 //images2.size()로 바꾸기!
+            //allItems.add(new Item("#추천 tag를 달아주세요", BitmapFactory.decodeFile(images2.get(i))));
+            allItems.add(new Item(categories[i], BitmapFactory.decodeFile(images2.get(i))));
+        }
+
+
+
+        //modified
+
+        return allItems;
     }
+    private ArrayList<String> getAllShownImagesPath(Context activity) {
+        // grouping 된 첫사진만
+        Uri uri;
+        Cursor cursor;
+        int data,album;
+        int check=0;
+
+
+
+        int column_index_data, column_index_folder_name;
+        ArrayList<String> listOfAllImages = new ArrayList<String>();
+        String absolutePathOfImage = null;
+        uri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        // 수정할부분
+        String[] projection = { MediaStore.MediaColumns.DATA,
+                MediaStore.Images.Media.BUCKET_DISPLAY_NAME };
+
+        cursor = activity.getContentResolver().query(
+                MediaStore.Files.getContentUri("external"),
+                null,
+                MediaStore.Images.Media.DATA + " like ? ",
+                new String[] {"%Screenshots%"},
+                null
+        );
+        column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+        column_index_folder_name = cursor
+                .getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
+        while (cursor.moveToNext()) {
+
+            absolutePathOfImage = cursor.getString(column_index_data);
+            listOfAllImages.add(absolutePathOfImage);
+
+        }
+        return listOfAllImages;
+    }//modified
 }

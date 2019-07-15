@@ -1,13 +1,17 @@
 package com.example.screenshotorg;
-
-import android.Manifest;
+//이거는 날리는 방지용입니다.
 import android.app.Activity;
+import android.content.Context;
+import android.content.Intent;
 import android.database.Cursor;
+import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.LayoutInflater;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.BaseAdapter;
@@ -15,6 +19,7 @@ import android.widget.Button;
 import android.widget.GridView;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.Nullable;
 import androidx.annotation.NonNull;
@@ -22,6 +27,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.Observer;
 import androidx.lifecycle.ViewModelProviders;
+import androidx.recyclerview.widget.LinearLayoutManager;
+import androidx.recyclerview.widget.RecyclerView;
 
 import com.bumptech.glide.Glide;
 import com.example.screenshotorg.R;
@@ -30,51 +37,76 @@ import com.google.android.gms.common.api.Batch;
 import com.google.api.services.vision.v1.model.BatchAnnotateImagesResponse;
 
 import java.util.ArrayList;
-import java.util.Collections;
 
-/**
- * A placeholder fragment containing a simple view.
- */
 public class Fragment1 extends Fragment {
-    private ArrayList<String> images;
-    ImageProcessor myImageProcessor;
-    static TextView textView, textResults;
-    Button button;
-    Uri currentUri;
+    private RecyclerView mRecyclerView;
+    private RecyclerView.Adapter mAdapter;
+    private RecyclerView.LayoutManager mLayoutManager;
+    private ArrayList<MyData> myDataset;
+    private static ArrayList<String> images;
+
+
+
     @Override
     public void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        pageViewModel = ViewModelProviders.of(this).get(PageViewModel.class);
-//        int index = 1;
-//        if (getArguments() != null) {
-//            index = getArguments().getInt(ARG_SECTION_NUMBER);
-//        }
-//        pageViewModel.setIndex(index);
+
     }
 
     @Override
     public View onCreateView(
             @NonNull LayoutInflater inflater, ViewGroup container,
             Bundle savedInstanceState) {
-        View view = inflater.inflate(R.layout.onefragment, container, false);
-        myImageProcessor = new ImageProcessor();
-        textView = view.findViewById(R.id.textView);
-        textResults = view.findViewById(R.id.textResults);
-        button = view.findViewById(R.id.button2);
-        button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                //Need this guy to choose account
-                //This guy is in checkPermissions of MainActivity
-                BatchAnnotateImagesResponse temp = myImageProcessor.performCloudVisionRequest(getContext(),currentUri);
-                    if (temp != null) {
-                    textView.setText(temp.toString()); //This is null
-                }
-            }
-        });
+        View root = inflater.inflate(R.layout.onefragment, container, false);
+        mRecyclerView = (RecyclerView)root.findViewById(R.id.my_recycler_view);
 
-        GridView gallery = (GridView) view.findViewById(R.id.galleryGridView);
-        gallery.setAdapter(new ImageAdapter((Activity) requireActivity()));
+        // use this setting to improve performance if you know that changes
+        // in content do not change the layout size of the RecyclerView
+        mRecyclerView.setHasFixedSize(true);
+
+        // use a linear layout manager
+        mLayoutManager = new LinearLayoutManager(requireContext());
+        ((LinearLayoutManager) mLayoutManager).setReverseLayout(true);
+        ((LinearLayoutManager) mLayoutManager).setStackFromEnd(true);
+        mRecyclerView.setLayoutManager(mLayoutManager);
+
+        // specify an adapter (see also next example)
+        myDataset = new ArrayList<>();
+        mAdapter = new MyAdapter(myDataset);
+        mRecyclerView.setAdapter(mAdapter);
+
+
+        mRecyclerView.addOnItemTouchListener(
+                new RecyclerItemClickListener(requireContext(),mRecyclerView, new RecyclerItemClickListener.OnItemClickListener() {
+                    @Override
+                    public void onItemClick(View view, int position) {
+                        Toast.makeText(requireContext(),"Edit 하려면 길게 누르세요.",Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(requireContext(),position+"번 째 아이템 클릭",Toast.LENGTH_SHORT).show();
+                    }
+
+                    @Override
+                    public void onLongItemClick(View view, int position) {
+                        Toast.makeText(requireContext(),"Edit 모드로 들어갑니다.",Toast.LENGTH_SHORT).show();
+
+                        Intent intent4 = new Intent(getActivity(), EditActivity.class);
+                        intent4.putExtra("edit", images.get(position));
+                        startActivity(intent4);
+                    }
+                })); //modified
+
+//        myDataset.add(new MyData("#InsideOut", R.drawable.search));
+//        myDataset.add(new MyData("#Mini", R.drawable.search));
+//        myDataset.add(new MyData("#ToyStroy", R.drawable.search));
+
+        //modified
+
+        images = getAllShownImagesPath(requireContext());
+
+        for (int i=1; i<images.size();i++){ //images에는 원하는 사진의 절대경로를 넣으면 됨
+            myDataset.add(new MyData("#추천 tag를 달아주세요",BitmapFactory.decodeFile(images.get(i-1))));
+        }
+
+
 //        final TextView textView = root.findViewById(R.id.section_label);
 //        pageViewModel.getText().observe(this, new Observer<String>() {
 //            @Override
@@ -87,99 +119,89 @@ public class Fragment1 extends Fragment {
     }
 
 
-    private class ImageAdapter extends BaseAdapter {
+    public static class RecyclerItemClickListener implements RecyclerView.OnItemTouchListener {
+        private OnItemClickListener mListener;
 
-        /** The context. */
-        private Activity context;
+        public interface OnItemClickListener {
+            void onItemClick(View view, int position);
 
-        /**
-         * Instantiates a new image adapter.
-         *
-         * @param localContext
-         *            the local context
-         */
-        public ImageAdapter(Activity localContext) {
-            context = localContext;
-            images = getAllShownImagesPath(context);
+            void onLongItemClick(View view, int position);
         }
 
-        public int getCount() {
-            return 1; //images.size();
+        GestureDetector mGestureDetector;
+
+        public RecyclerItemClickListener(Context context, final RecyclerView recyclerView, OnItemClickListener listener) {
+            mListener = listener;
+            mGestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+                @Override
+                public boolean onSingleTapUp(MotionEvent e) {
+                    return true;
+                }
+
+                @Override
+                public void onLongPress(MotionEvent e) {
+                    View child = recyclerView.findChildViewUnder(e.getX(), e.getY());
+                    if (child != null && mListener != null) {
+                        Log.d("long","press");
+                        mListener.onLongItemClick(child, recyclerView.getChildAdapterPosition(child));
+                    }
+                }
+            });
         }
 
-        public Object getItem(int position) {
-            return position;
-        }
-
-        public long getItemId(int position) {
-            return position;
-        }
-
-        public View getView(final int position, View convertView,
-                            ViewGroup parent) {
-            ImageView picturesView;
-            if (convertView == null) {
-                picturesView = new ImageView(context);
-                picturesView.setScaleType(ImageView.ScaleType.FIT_CENTER);
-                picturesView
-                        .setLayoutParams(new GridView.LayoutParams(270, 270));
-
-            } else {
-                picturesView = (ImageView) convertView;
+        @Override public boolean onInterceptTouchEvent(RecyclerView view, MotionEvent e) {
+            View childView = view.findChildViewUnder(e.getX(), e.getY());
+            if (childView != null && mListener != null && mGestureDetector.onTouchEvent(e)) {
+                mListener.onItemClick(childView, view.getChildAdapterPosition(childView));
+                return true;
             }
-
-            Glide.with(context).load(images.get(position))
-                    .placeholder(R.drawable.ic_launcher_background).centerCrop()
-                    .into(picturesView);
-
-            //Not sure if this will work
-            currentUri = Uri.parse(images.get(position));
-            BatchAnnotateImagesResponse temp = myImageProcessor.performCloudVisionRequest(getContext(),currentUri);
-            if (temp != null) {
-                textView.setText(temp.toString()); //This is null
-            }
-            return picturesView;
+            return false;
         }
 
-        /**
-         * Getting All Images Path.
-         *
-         * @param activity
-         *            the activity
-         * @return ArrayList with images Path
-         */
-        private ArrayList<String> getAllShownImagesPath(Activity activity) {
-            Uri uri;
-            Cursor cursor;
-            int column_index_data, column_index_folder_name;
-            ArrayList<String> listOfAllImages = new ArrayList<String>();
-            String absolutePathOfImage = null;
-            uri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
-            //currentUri = uri;
-            //Log.e("URI tag", uri.toString());
+        @Override public void onTouchEvent(RecyclerView view, MotionEvent motionEvent) { }
 
-            String[] projection = { MediaStore.MediaColumns.DATA,
-                    MediaStore.Images.Media.BUCKET_DISPLAY_NAME };
+        @Override public void onRequestDisallowInterceptTouchEvent (boolean disallowIntercept){}
+    }  //modified
 
-            //FOR ACCESSING THE SCREENSHOTS FOLDER
-            cursor = activity.getContentResolver().query(
-                    MediaStore.Files.getContentUri("external"),
-                    null,
-                    MediaStore.Images.Media.DATA + " like ? ",
-                    new String[] {"%Screenshots%"},
-                    android.provider.MediaStore.Images.Media.DATE_TAKEN + " DESC"
-            );
-            column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
-            column_index_folder_name = cursor
-                    .getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
-            while (cursor.moveToNext()) {
-                absolutePathOfImage = cursor.getString(column_index_data);
 
-                listOfAllImages.add(absolutePathOfImage);
-            }
 
-            //Collections.reverse(listOfAllImages);
-            return listOfAllImages;
+
+
+
+
+    private ArrayList<String> getAllShownImagesPath(Context activity) {
+        // grouping 된 첫사진만
+        Uri uri;
+        Cursor cursor;
+        int data,album;
+        int check=0;
+
+
+        int column_index_data, column_index_folder_name;
+        ArrayList<String> listOfAllImages = new ArrayList<String>();
+        String absolutePathOfImage = null;
+        uri = android.provider.MediaStore.Images.Media.EXTERNAL_CONTENT_URI;
+        // 수정할부분
+        String[] projection = { MediaStore.MediaColumns.DATA,
+                MediaStore.Images.Media.BUCKET_DISPLAY_NAME };
+
+        cursor = activity.getContentResolver().query(
+                MediaStore.Files.getContentUri("external"),
+                null,
+                MediaStore.Images.Media.DATA + " like ? ",
+                new String[] {"%Screenshots%"},
+                null
+        );
+        column_index_data = cursor.getColumnIndexOrThrow(MediaStore.MediaColumns.DATA);
+        column_index_folder_name = cursor
+                .getColumnIndexOrThrow(MediaStore.Images.Media.BUCKET_DISPLAY_NAME);
+        while (cursor.moveToNext()) {
+
+            absolutePathOfImage = cursor.getString(column_index_data);
+            listOfAllImages.add(absolutePathOfImage);
+
         }
-    }
+        return listOfAllImages;
+    }//modified
+
 }
