@@ -636,7 +636,7 @@ public class PreActivity extends AppCompatActivity {
         String[] shopping = {"perfume", "cosmetic", "clothes", "jewelry", "shoes", "shopping", "product"};
         String[] food= {"fruit", "food", "dish", "cuisine","kitchen"};
         String[] places = {"city", "tourist","landmark", "metropolis", "vacation", "beach", "sea", "island", "tourism", "caribbean", "mountain", "nature", "tree"};
-        String[] cosmetics = {"cosmetic", "lip", "eyeshadow", "tint", "beauty", "perfume", "blush", "mascara", "foundation", "product", "skin care"};
+        String[] cosmetics = {"cosmetic", "lip", "eyeshadow", "tint", "beauty", "perfume", "blush", "mascara", "foundation", "skin care"};
         String[] fashion = {"hat", "sunglass", "shirt", "dress", "scarf", "pants","fashion", "shoes", "clothes", "bag"};
         String[] text = {"text", "document"};
 
