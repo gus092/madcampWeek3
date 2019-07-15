@@ -81,7 +81,7 @@ public class SearchActivity extends Activity {
             JSONObject json = new JSONObject((dbHandler.findHandler(0).getStudentName()));
             JSONArray myType = json.getJSONArray(mycatname);
             for (int i = 0; i < myType.length(); i ++){
-                myimagelist.add(myType.get(0).toString());
+                myimagelist.add(myType.get(i).toString());
             }
 
         } catch (JSONException e){
